@@ -27,6 +27,7 @@
 #include <QStyleOptionSlider>
 #include <QLinearGradient>
 #include <QMouseEvent>
+#include <QDebug>
 
 static void loadResource()
 {
@@ -57,7 +58,12 @@ public:
 
     void mouse_event(QMouseEvent *ev, GradientSlider* owner, bool allow_jumps)
     {
-        QStyleOptionSlider opt;
+        qreal pos = static_cast<qreal>(ev->pos().x() - 3) / (owner->geometry().width() - 4);
+        pos = qMax(qMin(pos, 1.0), 0.0);
+        owner->setSliderPosition(qRound(owner->minimum() +
+            pos * (owner->maximum() - owner->minimum())));
+
+        /*QStyleOptionSlider opt;
         owner->initStyleOption(&opt);
         QRect slider_rect = owner->style()->subControlRect(
             QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, owner
@@ -97,7 +103,7 @@ public:
                 slider_max - slider_min,
                 opt.upsideDown
             )
-        );
+        );*/
     }
 
 };
@@ -271,8 +277,8 @@ void GradientSlider::paintEvent(QPaintEvent *)
     painter.setBrush(p->gradient);
     painter.drawRect(1,1,geometry().width()-2,geometry().height()-2);
 
-    painter.setClipping(false);
-    QStyleOptionSlider opt_slider;
+    //painter.setClipping(false);
+    /*QStyleOptionSlider opt_slider;
     initStyleOption(&opt_slider);
     opt_slider.tickPosition = TicksBothSides;
     opt_slider.state &= ~QStyle::State_HasFocus;
@@ -283,7 +289,43 @@ void GradientSlider::paintEvent(QPaintEvent *)
         opt_slider.activeSubControls = QStyle::SC_SliderHandle;
     }
 
-    style()->drawComplexControl(QStyle::CC_Slider, &opt_slider, &painter, this);
+    style()->drawComplexControl(QStyle::CC_Slider, &opt_slider, &painter, this);*/
+
+    //p->gradient.
+    qreal pos = static_cast<qreal>(value() - minimum()) / maximum();
+    QColor color;
+    auto stops = p->gradient.stops();
+    int i;
+    for (i = 0; i < stops.size(); i++) {
+        if (stops[i].first > pos)
+            break;
+    }
+    if (i == 0) {
+        color = firstColor();
+    } if (i == stops.size()) {
+        color = lastColor();
+    } else {
+        auto &a = stops[i - 1];
+        auto &b = stops[i];
+        qreal q = (pos - a.first) / (b.first - a.first);
+        color = QColor::fromRgbF(b.second.redF() * q + a.second.redF() * (1.0 - q),
+            b.second.greenF() * q + a.second.greenF() * (1.0 - q),
+            b.second.blueF() * q + a.second.blueF() * (1.0 - q),
+            b.second.alphaF() * q + a.second.alphaF() * (1.0 - q));
+    }
+
+
+
+    pos = pos * (geometry().width() - 5);
+    if (color.valueF() > 0.5) {
+        painter.setPen(QPen(Qt::black, 3));
+    } else {
+        painter.setPen(QPen(Qt::white, 3));
+    }
+    QPointF p1 = QPointF(2, 1) + QPointF(pos, 0);
+    QPointF p2 = p1 + QPointF(0, geometry().height() - 2);
+    painter.drawLine(p1, p2);
+    //qDebug() << p1 << p2;
 }
 
 } // namespace color_widgets
