@@ -56,9 +56,10 @@ public:
         gradient.setSpread(QGradient::RepeatSpread);
     }
 
-    void mouse_event(QMouseEvent *ev, GradientSlider* owner, bool /* allow_jumps */)
+    void mouse_event(QMouseEvent *ev, GradientSlider* owner)
     {
-        qreal pos = static_cast<qreal>(ev->pos().x() - 3) / (owner->geometry().width() - 4);
+        qreal pos = (owner->geometry().width() > 4) ?
+            static_cast<qreal>(ev->pos().x() - 3) / (owner->geometry().width() - 4) : 0;
         pos = qMax(qMin(pos, 1.0), 0.0);
         owner->setSliderPosition(qRound(owner->minimum() +
             pos * (owner->maximum() - owner->minimum())));
@@ -87,7 +88,7 @@ void GradientSlider::mousePressEvent(QMouseEvent *ev)
     {
         ev->accept();
         setSliderDown(true);
-        p->mouse_event(ev, this, false);
+        p->mouse_event(ev, this);
         update();
     }
     else
@@ -101,7 +102,7 @@ void GradientSlider::mouseMoveEvent(QMouseEvent *ev)
     if ( ev->buttons() & Qt::LeftButton )
     {
         ev->accept();
-        p->mouse_event(ev, this, true);
+        p->mouse_event(ev, this);
         update();
     }
     else
@@ -235,7 +236,8 @@ void GradientSlider::paintEvent(QPaintEvent *)
     painter.setBrush(p->gradient);
     painter.drawRect(1,1,geometry().width()-2,geometry().height()-2);
 
-    qreal pos = static_cast<qreal>(value() - minimum()) / maximum();
+    qreal pos = (maximum() != 0) ?
+        static_cast<qreal>(value() - minimum()) / maximum() : 0;
     QColor color;
     auto stops = p->gradient.stops();
     int i;
@@ -250,17 +252,17 @@ void GradientSlider::paintEvent(QPaintEvent *)
     } else {
         auto &a = stops[i - 1];
         auto &b = stops[i];
-        qreal q = (pos - a.first) / (b.first - a.first);
+        auto c = (b.first - a.first);
+        qreal q = (c != 0) ?
+            (pos - a.first) / c : 0;
         color = QColor::fromRgbF(b.second.redF() * q + a.second.redF() * (1.0 - q),
             b.second.greenF() * q + a.second.greenF() * (1.0 - q),
             b.second.blueF() * q + a.second.blueF() * (1.0 - q),
             b.second.alphaF() * q + a.second.alphaF() * (1.0 - q));
     }
 
-
-
     pos = pos * (geometry().width() - 5);
-    if (color.valueF() > 0.5) {
+    if (color.valueF() > 0.5 || color.alphaF() < 0.5) {
         painter.setPen(QPen(Qt::black, 3));
     } else {
         painter.setPen(QPen(Qt::white, 3));
