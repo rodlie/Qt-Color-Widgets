@@ -58,8 +58,8 @@ public:
 
     void mouse_event(QMouseEvent *ev, GradientSlider* owner)
     {
-        qreal pos = (owner->geometry().width() > 4) ?
-            static_cast<qreal>(ev->pos().x() - 3) / (owner->geometry().width() - 4) : 0;
+        qreal pos = (owner->geometry().width() > 5) ?
+            static_cast<qreal>(ev->pos().x() - 2.5) / (owner->geometry().width() - 5) : 0;
         pos = qMax(qMin(pos, 1.0), 0.0);
         owner->setSliderPosition(qRound(owner->minimum() +
             pos * (owner->maximum() - owner->minimum())));
@@ -267,8 +267,8 @@ void GradientSlider::paintEvent(QPaintEvent *)
     } else {
         painter.setPen(QPen(Qt::white, 3));
     }
-    QPointF p1 = QPointF(2, 1) + QPointF(pos, 0);
-    QPointF p2 = p1 + QPointF(0, geometry().height() - 2);
+    QPointF p1 = QPointF(2.5, 2.5) + QPointF(pos, 0);
+    QPointF p2 = p1 + QPointF(0, geometry().height() - 5);
     painter.drawLine(p1, p2);
 }
 
