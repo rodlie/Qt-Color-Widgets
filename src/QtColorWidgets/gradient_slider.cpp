@@ -134,6 +134,7 @@ void GradientSlider::setBackground(const QBrush &bg)
 {
     p->back = bg;
     update();
+    Q_EMIT backgroundChanged(bg);
 }
 
 QGradientStops GradientSlider::colors() const
