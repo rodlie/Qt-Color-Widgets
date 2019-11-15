@@ -22,7 +22,6 @@
 #include <QApplication>
 #include <cstring>
 #include <algorithm>
-#include <QDebug>
 
 #include "QtColorWidgets/color_2d_slider.hpp"
 #include "QtColorWidgets/color_delegate.hpp" /// \todo show it
@@ -121,11 +120,9 @@ int main(int argc, char *argv[])
     color_widgets::HueSlider hue_slider;
     hue_slider.setColor(demo_color);
     hue_slider.resize(192, hue_slider.sizeHint().height());
-    QObject::connect(&hue_slider, &color_widgets::HueSlider::valueChanged, [](int i){qDebug() << i;});
 //     hue_slider.setInvertedAppearance(true);
 //     hue_slider.setOrientation(Qt::Vertical);
     screenshot(hue_slider);
-
 
     color_widgets::ColorListWidget list_widget;
     list_widget.setColors({
