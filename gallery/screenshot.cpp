@@ -34,14 +34,13 @@
 #include "QtColorWidgets/color_preview.hpp"
 #include "QtColorWidgets/color_wheel.hpp"
 #include "QtColorWidgets/hue_slider.hpp"
+#include "QtColorWidgets/gradient_editor.hpp"
 
 bool run = false;
 QString just_this;
 
 void screenshot(QWidget& widget, QString name = QString())
 {
-    QPixmap pic(widget.size());
-    widget.render(&pic);
     if ( name.isEmpty() )
     {
         name = widget.metaObject()->className();
@@ -49,6 +48,9 @@ void screenshot(QWidget& widget, QString name = QString())
     }
     if ( !just_this.isEmpty() && name != just_this )
         return;
+
+    QPixmap pic(widget.size());
+    widget.render(&pic);
     name += ".png";
     pic.save(name);
     if ( run )
@@ -148,6 +150,14 @@ int main(int argc, char *argv[])
     });
     list_widget.resize(list_widget.sizeHint());
     screenshot(list_widget);
+
+    color_widgets::GradientEditor editor;
+    QGradientStops gradient_colors;
+    float n_colors = 6;
+    for ( int i = 0; i <= n_colors; ++i )
+        gradient_colors.append(QGradientStop(i/n_colors, QColor::fromHsvF(i/n_colors, 0.5, 1)));
+    editor.setStops(gradient_colors);
+    screenshot(editor);
 
     if ( run )
         return a.exec();
