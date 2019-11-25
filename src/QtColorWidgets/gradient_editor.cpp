@@ -27,6 +27,8 @@
 #include <QMouseEvent>
 #include <QApplication>
 
+#include "QtColorWidgets/gradient_helper.hpp"
+
 namespace color_widgets {
 
 class GradientEditor::Private
@@ -37,6 +39,7 @@ public:
     Qt::Orientation orientation;
     int highlighted = -1;
     QLinearGradient gradient;
+    bool dragging = false;
 
     Private() :
         back(Qt::darkGray, Qt::DiagCrossPattern)
@@ -94,11 +97,31 @@ GradientEditor::~GradientEditor()
     delete p;
 }
 
+void GradientEditor::mouseDoubleClickEvent(QMouseEvent *ev)
+{
+    if ( ev->button() == Qt::LeftButton )
+    {
+        ev->accept();
+        p->dragging = false;
+        qreal pos = p->move_pos(ev, this);
+        auto info = gradientBlendedColorInsert(p->stops, pos);
+        p->stops.insert(info.first, info.second);
+        p->highlighted = info.first;
+        p->refresh_gradient();
+        update();
+    }
+    else
+    {
+        QWidget::mousePressEvent(ev);
+    }
+}
+
 void GradientEditor::mousePressEvent(QMouseEvent *ev)
 {
     if ( ev->button() == Qt::LeftButton )
     {
         ev->accept();
+        p->dragging = true;
         p->highlighted = p->closest(ev, this);
         update();
     }
@@ -140,8 +163,14 @@ void GradientEditor::mouseReleaseEvent(QMouseEvent *ev)
     if ( ev->button() == Qt::LeftButton && p->highlighted != -1 )
     {
         ev->accept();
+        if ( !rect().contains(ev->localPos().toPoint()) )
+        {
+            p->stops.remove(p->highlighted);
+            p->highlighted = -1;
+            p->refresh_gradient();
+        }
+        p->dragging = false;
         emit stopsChanged(p->stops);
-        p->highlighted = -1;
         update();
     }
     else
@@ -152,6 +181,7 @@ void GradientEditor::mouseReleaseEvent(QMouseEvent *ev)
 
 void GradientEditor::leaveEvent(QEvent*)
 {
+    p->dragging = false;
     p->highlighted = -1;
     update();
 }
@@ -177,6 +207,7 @@ QGradientStops GradientEditor::stops() const
 void GradientEditor::setStops(const QGradientStops &colors)
 {
     p->highlighted = -1;
+    p->dragging = false;
     p->stops = colors;
     p->refresh_gradient();
     emit stopsChanged(p->stops);

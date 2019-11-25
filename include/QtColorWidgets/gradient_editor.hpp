@@ -78,6 +78,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *ev) override;
     void mouseReleaseEvent(QMouseEvent *ev) override;
     void leaveEvent(QEvent * event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
     class Private;
