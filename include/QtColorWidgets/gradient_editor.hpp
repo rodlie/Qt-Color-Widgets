@@ -39,6 +39,8 @@ class QCP_EXPORT GradientEditor : public QWidget
     Q_PROPERTY(QGradientStops stops READ stops WRITE setStops NOTIFY stopsChanged)
     Q_PROPERTY(QLinearGradient gradient READ gradient WRITE setGradient)
     Q_PROPERTY(Qt::Orientation orientation READ orientation WRITE setOrientation)
+    Q_PROPERTY(int selectedStop READ selectedStop WRITE setSelectedStop NOTIFY selectedStopChanged)
+    Q_PROPERTY(QColor selectedColor READ selectedColor WRITE setSelectedColor)
 
 public:
     explicit GradientEditor(QWidget *parent = 0);
@@ -64,12 +66,25 @@ public:
 
     Qt::Orientation orientation() const;
 
+    /**
+     * \brief Index of the currently selected gradient stop (or -1 if there is no selection)
+     */
+    int selectedStop() const;
+
+    /**
+     * \brief Color of the selected stop
+     */
+    QColor selectedColor() const;
+
 public Q_SLOTS:
     void setOrientation(Qt::Orientation);
+    void setSelectedStop(int stop);
+    void setSelectedColor(const QColor& color);
 
 Q_SIGNALS:
     void backgroundChanged(const QBrush&);
     void stopsChanged(const QGradientStops&);
+    void selectedStopChanged(int);
 
 protected:
     void paintEvent(QPaintEvent *ev) override;

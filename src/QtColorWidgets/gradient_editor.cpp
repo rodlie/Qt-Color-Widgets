@@ -39,7 +39,7 @@ public:
     Qt::Orientation orientation;
     int highlighted = -1;
     QLinearGradient gradient;
-    bool dragging = false;
+    int selected = -1;
 
     Private() :
         back(Qt::darkGray, Qt::DiagCrossPattern)
@@ -102,12 +102,12 @@ void GradientEditor::mouseDoubleClickEvent(QMouseEvent *ev)
     if ( ev->button() == Qt::LeftButton )
     {
         ev->accept();
-        p->dragging = false;
         qreal pos = p->move_pos(ev, this);
         auto info = gradientBlendedColorInsert(p->stops, pos);
         p->stops.insert(info.first, info.second);
-        p->highlighted = info.first;
+        p->selected = p->highlighted = info.first;
         p->refresh_gradient();
+        emit selectedStopChanged(p->selected);
         update();
     }
     else
@@ -121,8 +121,8 @@ void GradientEditor::mousePressEvent(QMouseEvent *ev)
     if ( ev->button() == Qt::LeftButton )
     {
         ev->accept();
-        p->dragging = true;
-        p->highlighted = p->closest(ev, this);
+        p->selected = p->highlighted = p->closest(ev, this);
+        emit selectedStopChanged(p->selected);
         update();
     }
     else
@@ -133,21 +133,24 @@ void GradientEditor::mousePressEvent(QMouseEvent *ev)
 
 void GradientEditor::mouseMoveEvent(QMouseEvent *ev)
 {
-    if ( ev->buttons() & Qt::LeftButton && p->highlighted != -1 )
+    if ( ev->buttons() & Qt::LeftButton && p->selected != -1 )
     {
         ev->accept();
         qreal pos = p->move_pos(ev, this);
-        if ( p->highlighted > 0 && pos < p->stops[p->highlighted-1].first )
+        if ( p->selected > 0 && pos < p->stops[p->selected-1].first )
         {
-            std::swap(p->stops[p->highlighted], p->stops[p->highlighted-1]);
-            p->highlighted--;
+            std::swap(p->stops[p->selected], p->stops[p->selected-1]);
+            p->selected--;
+            emit selectedStopChanged(p->selected);
         }
-        else if ( p->highlighted < p->stops.size()-1 && pos > p->stops[p->highlighted+1].first )
+        else if ( p->selected < p->stops.size()-1 && pos > p->stops[p->selected+1].first )
         {
-            std::swap(p->stops[p->highlighted], p->stops[p->highlighted+1]);
-            p->highlighted++;
+            std::swap(p->stops[p->selected], p->stops[p->selected+1]);
+            p->selected++;
+            emit selectedStopChanged(p->selected);
         }
-        p->stops[p->highlighted].first = pos;
+        p->highlighted = p->selected;
+        p->stops[p->selected].first = pos;
         p->refresh_gradient();
         update();
     }
@@ -160,16 +163,16 @@ void GradientEditor::mouseMoveEvent(QMouseEvent *ev)
 
 void GradientEditor::mouseReleaseEvent(QMouseEvent *ev)
 {
-    if ( ev->button() == Qt::LeftButton && p->highlighted != -1 )
+    if ( ev->button() == Qt::LeftButton && p->selected != -1 )
     {
         ev->accept();
         if ( !rect().contains(ev->localPos().toPoint()) )
         {
-            p->stops.remove(p->highlighted);
-            p->highlighted = -1;
+            p->stops.remove(p->selected);
+            p->highlighted = p->selected = -1;
+            emit selectedStopChanged(p->selected);
             p->refresh_gradient();
         }
-        p->dragging = false;
         emit stopsChanged(p->stops);
         update();
     }
@@ -181,7 +184,6 @@ void GradientEditor::mouseReleaseEvent(QMouseEvent *ev)
 
 void GradientEditor::leaveEvent(QEvent*)
 {
-    p->dragging = false;
     p->highlighted = -1;
     update();
 }
@@ -206,10 +208,10 @@ QGradientStops GradientEditor::stops() const
 
 void GradientEditor::setStops(const QGradientStops &colors)
 {
-    p->highlighted = -1;
-    p->dragging = false;
+    p->selected = p->highlighted = -1;
     p->stops = colors;
     p->refresh_gradient();
+    emit selectedStopChanged(p->selected);
     emit stopsChanged(p->stops);
     update();
 }
@@ -274,11 +276,18 @@ void GradientEditor::paintEvent(QPaintEvent *)
 
         QPointF p1 = QPointF(2.5, 2.5) + QPointF(pos, 0);
         QPointF p2 = p1 + QPointF(0, geometry().height() - 5);
-        if ( i == p->highlighted )
+        if ( i == p->selected )
         {
             painter.setPen(QPen(border_color, 5));
             painter.drawLine(p1, p2);
             painter.setPen(QPen(core_color, 3));
+            painter.drawLine(p1, p2);
+        }
+        else if ( i == p->highlighted )
+        {
+            painter.setPen(QPen(border_color, 3));
+            painter.drawLine(p1, p2);
+            painter.setPen(QPen(core_color, 1));
             painter.drawLine(p1, p2);
         }
         else
@@ -306,6 +315,34 @@ QSize GradientEditor::sizeHint() const
     return style()->sizeFromContents(QStyle::CT_Slider, &opt, QSize(w, h), this)
         .expandedTo(QApplication::globalStrut());
 }
+
+int GradientEditor::selectedStop() const
+{
+    return p->selected;
+}
+
+void GradientEditor::setSelectedStop(int stop)
+{
+    if ( stop >= -1 && stop < p->stops.size() )
+    {
+        p->selected = stop;
+        emit selectedStopChanged(p->selected);
+    }
+}
+
+QColor GradientEditor::selectedColor() const
+{
+    if ( p->selected != -1 )
+        return p->stops[p->selected].second;
+    return {};
+}
+
+void GradientEditor::setSelectedColor(const QColor& color)
+{
+    if ( p->selected != -1 )
+        p->stops[p->selected].second = color;
+}
+
 
 
 } // namespace color_widgets
