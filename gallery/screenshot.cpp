@@ -19,9 +19,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include <QApplication>
 #include <cstring>
 #include <algorithm>
+
+#include <QApplication>
+#include <QCommandLineParser>
 
 #include "QtColorWidgets/color_2d_slider.hpp"
 #include "QtColorWidgets/color_delegate.hpp" /// \todo show it
@@ -34,6 +36,7 @@
 #include "QtColorWidgets/hue_slider.hpp"
 
 bool run = false;
+QString just_this;
 
 void screenshot(QWidget& widget, QString name = QString())
 {
@@ -44,6 +47,8 @@ void screenshot(QWidget& widget, QString name = QString())
         name = widget.metaObject()->className();
         name.remove("color_widgets::");
     }
+    if ( !just_this.isEmpty() && name != just_this )
+        return;
     name += ".png";
     pic.save(name);
     if ( run )
@@ -54,7 +59,16 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    run = a.arguments().contains("--run");
+    QCommandLineParser parser;
+    parser.addHelpOption();
+    parser.addPositionalArgument("just_this", "Only this widget");
+    QCommandLineOption run_option("run", "Show widgets instead of saving to file");
+    parser.addOption(run_option);
+
+    parser.process(a);
+    run = parser.isSet(run_option);
+    if ( !parser.positionalArguments().empty() )
+        just_this = parser.positionalArguments()[0];
 
     QColor demo_color(64,172,143,128);
 
