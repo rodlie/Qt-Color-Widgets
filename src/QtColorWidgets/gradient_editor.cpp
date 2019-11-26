@@ -26,6 +26,10 @@
 #include <QLinearGradient>
 #include <QMouseEvent>
 #include <QApplication>
+#include <QDrag>
+#include <QMimeData>
+#include <QDropEvent>
+#include <QDragEnterEvent>
 
 #include "QtColorWidgets/gradient_helper.hpp"
 
@@ -40,6 +44,9 @@ public:
     int highlighted = -1;
     QLinearGradient gradient;
     int selected = -1;
+    int drop_index = -1;
+    QColor drop_color;
+    qreal drop_pos = 0;
 
     Private() :
         back(Qt::darkGray, Qt::DiagCrossPattern)
@@ -54,13 +61,13 @@ public:
         gradient.setStops(stops);
     }
 
-    int closest(QMouseEvent *ev, GradientEditor* owner)
+    int closest(const QPoint& p, GradientEditor* owner)
     {
         if ( stops.empty() )
             return -1;
         if ( stops.size() == 1 || owner->geometry().width() <= 5 )
             return 0;
-        qreal pos = move_pos(ev, owner);
+        qreal pos = move_pos(p, owner);
 
         int i = 1;
         for ( ; i < stops.size()-1; i++ )
@@ -72,11 +79,43 @@ public:
         return i-1;
     }
 
-    qreal move_pos(QMouseEvent *ev, GradientEditor* owner)
+    qreal move_pos(const QPoint& p, GradientEditor* owner)
     {
-        return (owner->geometry().width() > 5) ?
-            qMax(qMin(static_cast<qreal>(ev->pos().x() - 2.5) / (owner->geometry().width() - 5), 1.0), 0.0)
-            : 0;
+        int width;
+        qreal x;
+        if ( orientation == Qt::Horizontal )
+        {
+            width = owner->geometry().width();
+            x = p.x();
+        }
+        else
+        {
+            width = owner->geometry().height();
+            x = p.y();
+        }
+        return (width > 5) ? qMax(qMin((x - 2.5) / (width - 5), 1.0), 0.0) : 0;
+    }
+
+    void drop_event(QDropEvent* event, GradientEditor* owner)
+    {
+        drop_index = closest(event->pos(), owner);
+        drop_pos = move_pos(event->pos(), owner);
+        if ( drop_index == -1 )
+            drop_index = stops.size();
+
+        // Gather up the color
+        if ( event->mimeData()->hasColor() )
+            drop_color = event->mimeData()->colorData().value<QColor>();
+        else if ( event->mimeData()->hasText() )
+            drop_color = QColor(event->mimeData()->text());
+
+        owner->update();
+    }
+    void clear_drop(GradientEditor* owner)
+    {
+        drop_index = -1;
+        drop_color = QColor();
+        owner->update();
     }
 };
 
@@ -90,6 +129,7 @@ GradientEditor::GradientEditor(Qt::Orientation orientation, QWidget *parent) :
     p->orientation = orientation;
     setMouseTracking(true);
     resize(sizeHint());
+    setAcceptDrops(true);
 }
 
 GradientEditor::~GradientEditor()
@@ -102,7 +142,7 @@ void GradientEditor::mouseDoubleClickEvent(QMouseEvent *ev)
     if ( ev->button() == Qt::LeftButton )
     {
         ev->accept();
-        qreal pos = p->move_pos(ev, this);
+        qreal pos = p->move_pos(ev->pos(), this);
         auto info = gradientBlendedColorInsert(p->stops, pos);
         p->stops.insert(info.first, info.second);
         p->selected = p->highlighted = info.first;
@@ -121,7 +161,7 @@ void GradientEditor::mousePressEvent(QMouseEvent *ev)
     if ( ev->button() == Qt::LeftButton )
     {
         ev->accept();
-        p->selected = p->highlighted = p->closest(ev, this);
+        p->selected = p->highlighted = p->closest(ev->pos(), this);
         emit selectedStopChanged(p->selected);
         update();
     }
@@ -136,7 +176,7 @@ void GradientEditor::mouseMoveEvent(QMouseEvent *ev)
     if ( ev->buttons() & Qt::LeftButton && p->selected != -1 )
     {
         ev->accept();
-        qreal pos = p->move_pos(ev, this);
+        qreal pos = p->move_pos(ev->pos(), this);
         if ( p->selected > 0 && pos < p->stops[p->selected-1].first )
         {
             std::swap(p->stops[p->selected], p->stops[p->selected-1]);
@@ -156,7 +196,7 @@ void GradientEditor::mouseMoveEvent(QMouseEvent *ev)
     }
     else
     {
-        p->highlighted = p->closest(ev, this);
+        p->highlighted = p->closest(ev->pos(), this);
         update();
     }
 }
@@ -166,12 +206,12 @@ void GradientEditor::mouseReleaseEvent(QMouseEvent *ev)
     if ( ev->button() == Qt::LeftButton && p->selected != -1 )
     {
         ev->accept();
-        if ( !rect().contains(ev->localPos().toPoint()) )
+        if ( !rect().contains(ev->localPos().toPoint()) && p->stops.size() > 1 )
         {
             p->stops.remove(p->selected);
             p->highlighted = p->selected = -1;
-            emit selectedStopChanged(p->selected);
             p->refresh_gradient();
+            emit selectedStopChanged(p->selected);
         }
         emit stopsChanged(p->stops);
         update();
@@ -263,6 +303,7 @@ void GradientEditor::paintEvent(QPaintEvent *)
     painter.setBrush(p->gradient);
     painter.drawRect(1,1,geometry().width()-2,geometry().height()-2);
 
+    /// \todo Take orientation into account
     int i = 0;
     for ( const QGradientStop& stop : p->stops )
     {
@@ -297,6 +338,15 @@ void GradientEditor::paintEvent(QPaintEvent *)
         }
 
         i++;
+    }
+
+    if ( p->drop_index != -1 && p->drop_color.isValid() )
+    {
+        qreal pos = p->drop_pos * (geometry().width() - 5);
+        painter.setPen(QPen(p->drop_color, 3));
+        QPointF p1 = QPointF(2.5, 2.5) + QPointF(pos, 0);
+        QPointF p2 = p1 + QPointF(0, geometry().height() - 5);
+        painter.drawLine(p1, p2);
     }
 
 }
@@ -343,6 +393,42 @@ void GradientEditor::setSelectedColor(const QColor& color)
         p->stops[p->selected].second = color;
 }
 
+
+void GradientEditor::dragEnterEvent(QDragEnterEvent *event)
+{
+    p->drop_event(event, this);
+
+    if ( p->drop_color.isValid() && p->drop_index != -1 )
+    {
+        event->setDropAction(Qt::CopyAction);
+        event->accept();
+    }
+}
+
+void GradientEditor::dragMoveEvent(QDragMoveEvent* event)
+{
+    p->drop_event(event, this);
+}
+
+void GradientEditor::dragLeaveEvent(QDragLeaveEvent *)
+{
+    p->clear_drop(this);
+}
+
+void GradientEditor::dropEvent(QDropEvent *event)
+{
+    p->drop_event(event, this);
+
+    if ( !p->drop_color.isValid() || p->drop_index == -1 )
+        return;
+
+    p->stops.insert(p->drop_index, {p->drop_pos, p->drop_color});
+    p->refresh_gradient();
+    p->selected = p->drop_index;
+    event->accept();
+    p->clear_drop(this);
+    emit selectedStopChanged(p->selected);
+}
 
 
 } // namespace color_widgets

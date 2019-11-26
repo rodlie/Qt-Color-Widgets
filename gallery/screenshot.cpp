@@ -37,7 +37,7 @@
 #include "QtColorWidgets/gradient_editor.hpp"
 
 bool run = false;
-QString just_this;
+QStringList just_these;
 
 void screenshot(QWidget& widget, QString name = QString())
 {
@@ -46,9 +46,10 @@ void screenshot(QWidget& widget, QString name = QString())
         name = widget.metaObject()->className();
         name.remove("color_widgets::");
     }
-    if ( !just_this.isEmpty() && name != just_this )
+    if ( !just_these.isEmpty() && !just_these.contains(name) )
         return;
 
+    widget.setWindowTitle(name);
     QPixmap pic(widget.size());
     widget.render(&pic);
     name += ".png";
@@ -63,14 +64,13 @@ int main(int argc, char *argv[])
 
     QCommandLineParser parser;
     parser.addHelpOption();
-    parser.addPositionalArgument("just_this", "Only this widget");
+    parser.addPositionalArgument("just_these", "Only these widgets");
     QCommandLineOption run_option("run", "Show widgets instead of saving to file");
     parser.addOption(run_option);
 
     parser.process(a);
     run = parser.isSet(run_option);
-    if ( !parser.positionalArguments().empty() )
-        just_this = parser.positionalArguments()[0];
+    just_these = parser.positionalArguments();
 
     QColor demo_color(64,172,143,128);
 
