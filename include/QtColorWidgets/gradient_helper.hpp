@@ -28,6 +28,16 @@
 
 namespace color_widgets {
 
+inline QColor blendColors(const QColor& a, const QColor& b, qreal ratio)
+{
+    return QColor::fromRgbF(
+        a.redF()   * (1-ratio) + b.redF()   * ratio,
+        a.greenF() * (1-ratio) + b.greenF() * ratio,
+        a.blueF()  * (1-ratio) + b.blueF()  * ratio,
+        a.alphaF() * (1-ratio) + b.alphaF() * ratio
+    );
+}
+
 
 /**
  * \brief Get an insertion point in the gradient
@@ -50,12 +60,7 @@ inline QPair<int, QGradientStop> Q_DECL_EXPORT gradientBlendedColorInsert(const 
         if ( factor < s2.first )
         {
             qreal ratio = (factor - s1.first) / (s2.first - s1.first);
-            return {i, {factor, QColor::fromRgbF(
-                s1.second.redF() * (1-ratio) + s2.second.redF() * ratio,
-                s1.second.greenF() * (1-ratio) + s2.second.greenF() * ratio,
-                s1.second.blueF() * (1-ratio) + s2.second.blueF() * ratio,
-                s1.second.alphaF() * (1-ratio) + s2.second.alphaF() * ratio
-            )}};
+            return {i, {factor, blendColors(s1.second, s2.second, ratio)}};
         }
         s1 = s2;
         ++i;

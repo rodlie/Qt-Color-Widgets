@@ -80,6 +80,8 @@ public Q_SLOTS:
     void setOrientation(Qt::Orientation);
     void setSelectedStop(int stop);
     void setSelectedColor(const QColor& color);
+    void addStop();
+    void removeStop();
 
 Q_SIGNALS:
     void backgroundChanged(const QBrush&);

@@ -117,6 +117,52 @@ public:
         drop_color = QColor();
         owner->update();
     }
+
+    void add_stop_data(int& index, qreal& pos, QColor& color)
+    {
+        if ( stops.empty() )
+        {
+            index = 0;
+            pos = 0;
+            color = Qt::black;
+            return;
+        }
+        if ( stops.size() == 1 )
+        {
+            color = stops[0].second;
+            if ( stops[0].first == 1 )
+            {
+                index = 0;
+                pos = 0.5;
+            }
+            else
+            {
+                index = 1;
+                pos = (stops[0].first + 1) / 2;
+            }
+            return;
+        }
+
+        int i_before = selected;
+        if ( i_before == -1 )
+            i_before = stops.size() - 1;
+
+        if ( i_before == stops.size() - 1 )
+        {
+            if ( stops[i_before].first < 1 )
+            {
+                color = stops[i_before].second;
+                pos = (stops[i_before].first + 1) / 2;
+                index = stops.size();
+                return;
+            }
+            i_before--;
+        }
+
+        index = i_before + 1;
+        pos = (stops[i_before].first + stops[i_before+1].first) / 2;
+        color = blendColors(stops[i_before].second, stops[i_before+1].second, 0.5);
+    }
 };
 
 GradientEditor::GradientEditor(QWidget *parent) :
@@ -390,7 +436,11 @@ QColor GradientEditor::selectedColor() const
 void GradientEditor::setSelectedColor(const QColor& color)
 {
     if ( p->selected != -1 )
+    {
         p->stops[p->selected].second = color;
+        p->refresh_gradient();
+        update();
+    }
 }
 
 
@@ -428,6 +478,40 @@ void GradientEditor::dropEvent(QDropEvent *event)
     event->accept();
     p->clear_drop(this);
     emit selectedStopChanged(p->selected);
+}
+
+void GradientEditor::addStop()
+{
+    int index = -1;
+    qreal pos = 0;
+    QColor color;
+    p->add_stop_data(index, pos, color);
+    p->stops.insert(index, {pos, color});
+    p->selected = p->highlighted = index;
+    p->refresh_gradient();
+    update();
+    emit selectedStopChanged(p->selected);
+}
+
+void GradientEditor::removeStop()
+{
+    if ( p->stops.size() < 2 )
+        return;
+
+    int selected = p->selected;
+    if ( selected == -1 )
+        selected = p->stops.size() - 1;
+    p->stops.remove(selected);
+    p->refresh_gradient();
+
+    if ( p->selected != -1 )
+    {
+        p->selected = -1;
+        emit selectedStopChanged(p->selected);
+    }
+
+    update();
+
 }
 
 
