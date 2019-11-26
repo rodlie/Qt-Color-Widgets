@@ -102,5 +102,5 @@ QString Swatch_Plugin::domXml() const
 
 QString Swatch_Plugin::includeFile() const
 {
-    return "swatch.hpp";
+    return "QtColorWidgets/swatch.hpp";
 }

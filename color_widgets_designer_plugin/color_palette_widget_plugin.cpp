@@ -116,5 +116,5 @@ QString ColorPaletteWidget_Plugin::domXml() const
 
 QString ColorPaletteWidget_Plugin::includeFile() const
 {
-    return "color_palette_widget.hpp";
+    return "QtColorWidgets/color_palette_widget.hpp";
 }

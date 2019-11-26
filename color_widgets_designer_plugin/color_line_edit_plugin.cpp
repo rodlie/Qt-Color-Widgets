@@ -83,5 +83,5 @@ QString ColorLineEdit_Plugin::whatsThis() const
 
 QString ColorLineEdit_Plugin::includeFile() const
 {
-    return "color_line_edit.hpp";
+    return "QtColorWidgets/color_line_edit.hpp";
 }

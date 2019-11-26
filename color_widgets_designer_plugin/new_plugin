@@ -158,7 +158,7 @@ QString $plugin::whatsThis() const
 
 QString $plugin::includeFile() const
 {
-    return "$header";
+    return "QtColorWidgets/$header";
 }
 
 PLUGIN

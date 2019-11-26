@@ -84,5 +84,5 @@ QString ColorListWidget_Plugin::domXml() const
 
 QString ColorListWidget_Plugin::includeFile() const
 {
-    return "color_list_widget.hpp";
+    return "QtColorWidgets/color_list_widget.hpp";
 }

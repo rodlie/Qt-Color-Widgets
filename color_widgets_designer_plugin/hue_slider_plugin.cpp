@@ -94,5 +94,5 @@ QString HueSlider_Plugin::domXml() const
 
 QString HueSlider_Plugin::includeFile() const
 {
-    return "hue_slider.hpp";
+    return "QtColorWidgets/hue_slider.hpp";
 }

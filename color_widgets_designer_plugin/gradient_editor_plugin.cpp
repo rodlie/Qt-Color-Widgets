@@ -93,6 +93,6 @@ QString GradientEditor_Plugin::whatsThis() const
 
 QString GradientEditor_Plugin::includeFile() const
 {
-    return "gradient_editor.hpp";
+    return "QtColorWidgets/gradient_editor.hpp";
 }
 

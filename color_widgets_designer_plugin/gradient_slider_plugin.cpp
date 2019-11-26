@@ -98,5 +98,5 @@ QString GradientSlider_Plugin::domXml() const
 
 QString GradientSlider_Plugin::includeFile() const
 {
-    return "gradient_slider.hpp";
+    return "QtColorWidgets/gradient_slider.hpp";
 }

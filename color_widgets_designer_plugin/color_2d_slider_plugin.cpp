@@ -86,5 +86,5 @@ QString Color2DSlider_Plugin::domXml() const
 
 QString Color2DSlider_Plugin::includeFile() const
 {
-    return "color_2d_slider.hpp";
+    return "QtColorWidgets/color_2d_slider.hpp";
 }

@@ -93,5 +93,5 @@ QString ColorWheel_Plugin::domXml() const
 
 QString ColorWheel_Plugin::includeFile() const
 {
-    return "color_wheel.hpp";
+    return "QtColorWidgets/color_wheel.hpp";
 }
