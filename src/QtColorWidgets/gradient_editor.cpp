@@ -252,7 +252,14 @@ void GradientEditor::mouseReleaseEvent(QMouseEvent *ev)
     if ( ev->button() == Qt::LeftButton && p->selected != -1 )
     {
         ev->accept();
-        if ( !rect().contains(ev->localPos().toPoint()) && p->stops.size() > 1 )
+        QRect bound_rect = rect();
+        QPoint localpt = ev->localPos().toPoint();
+        const int w_margin = 24;
+        const int h_margin = 8;
+        if ( !bound_rect.contains(localpt) && p->stops.size() > 1 && (
+            localpt.x() < -w_margin || localpt.x() > bound_rect.width() + w_margin ||
+            localpt.y() < -h_margin || localpt.y() > bound_rect.height() + h_margin
+        ) )
         {
             p->stops.remove(p->selected);
             p->highlighted = p->selected = -1;
@@ -358,7 +365,7 @@ void GradientEditor::paintEvent(QPaintEvent *)
         Qt::GlobalColor border_color = Qt::black;
         Qt::GlobalColor core_color = Qt::white;
 
-        if (color.valueF() >= 0.5 && color.alphaF() <= 0.5)
+        if ( color.valueF() <= 0.5 && color.alphaF() >= 0.5 )
             std::swap(core_color, border_color);
 
         QPointF p1 = QPointF(2.5, 2.5) + QPointF(pos, 0);
