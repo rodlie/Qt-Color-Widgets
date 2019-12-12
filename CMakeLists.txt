@@ -112,11 +112,15 @@ set (EXPORT_HEADER "${INCLUDE_PREFIX}/colorwidgets_global.hpp")
 
 
 generate_versioning_information (
-  TARGET_NAME ${TARGET_NAME}
-  EXPORT_HEADER ${EXPORT_HEADER}
-  EXPORT_MACRO QCP_EXPORT
-  VERSIONED_ENTITY ${COLORWIDGET_PROJECT_NAME}
-  INCLUDE_PREFIX ${INCLUDE_PREFIX})
+    TARGET_NAME ${TARGET_NAME}
+    EXPORT_HEADER ${EXPORT_HEADER}
+    EXPORT_MACRO QCP_EXPORT
+    VERSIONED_ENTITY ${COLORWIDGET_PROJECT_NAME}
+    INCLUDE_PREFIX ${INCLUDE_PREFIX}
+    COMPANY_NAME "Mattia Basaglia"
+    COMPANY_COPYRIGHT "Mattia Basaglia Copyright (C) 2013-2017"
+    FILE_DESCRIPTION "Color wheel widget and dialog for Qt${QT_VERSION}"
+)
 
 
 target_include_directories(${TARGET_NAME}
@@ -156,7 +160,7 @@ add_subdirectory (gallery)
 
 option(QTCOLORWIDGETS_DESIGNER_PLUGIN "Build QtDesigner plugin" ON)
 if (${QTCOLORWIDGETS_DESIGNER_PLUGIN})
-    find_package (Qt5Designer)
+    find_package (Qt5Designer QUIET)
     if (Qt5Designer_FOUND)
         add_subdirectory (color_widgets_designer_plugin)
     endif(Qt5Designer_FOUND)
