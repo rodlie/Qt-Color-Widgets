@@ -71,6 +71,10 @@ set (TARGET_OUTPUT_SUFFIX "-Qt${QT_VERSION}${${COLORWIDGET_PROJECT_NAME}_VERSION
 set (INCLUDE_PREFIX "QtColorWidgets")
 set (COLOR_WIDGETS_LIBRARY "${TARGET_NAME}")
 
+if ( ${BUILD_STATIC_LIBS} )
+    add_definitions(-DQTCOLORWIDGETS_STATICALLY_LINKED)
+endif()
+
 
 add_library (${TARGET_NAME} "")
 set_target_properties(${TARGET_NAME}
