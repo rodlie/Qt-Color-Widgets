@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2017 Mattia Basaglia
+# Copyright (C) 2013-2019 Mattia Basaglia
 #
 #
 # This software is free software: you can redistribute it and/or modify
@@ -44,7 +44,7 @@ HEADERS += \
     $$PWD/include/QtColorWidgets/bound_color_selector.hpp \
     $$PWD/include/QtColorWidgets/color_2d_slider.hpp \
     $$PWD/include/QtColorWidgets/ColorDelegate \
-    $$PWD/include/QtColorWidgets/color_delegate.hpp
+    $$PWD/include/QtColorWidgets/color_delegate.hpp \
     $$PWD/include/QtColorWidgets/ColorDialog \
     $$PWD/include/QtColorWidgets/color_dialog.hpp \
     $$PWD/include/QtColorWidgets/color_line_edit.hpp \
