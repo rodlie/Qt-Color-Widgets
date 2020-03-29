@@ -62,4 +62,4 @@ As a special exception, this library can be included in any project under the
 terms of any of the GNU liceses, distributing the whole project under a
 different GNU license, see LICENSE-EXCEPTION for details.
 
-Copyright (C) 2013-2017 Mattia Basaglia <mattia.basaglia@gmail.com>
+Copyright (C) 2013-2020 Mattia Basaglia <dev@dragon.best>
