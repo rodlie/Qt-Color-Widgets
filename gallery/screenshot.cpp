@@ -33,6 +33,7 @@
 #include "QtColorWidgets/color_palette_widget.hpp"
 #include "QtColorWidgets/color_preview.hpp"
 #include "QtColorWidgets/color_wheel.hpp"
+#include "QtColorWidgets/harmony_color_wheel.hpp"
 #include "QtColorWidgets/hue_slider.hpp"
 #include "QtColorWidgets/gradient_editor.hpp"
 
@@ -158,6 +159,13 @@ int main(int argc, char *argv[])
         gradient_colors.append(QGradientStop(i/n_colors, QColor::fromHsvF(i/n_colors, 0.5, 1)));
     editor.setStops(gradient_colors);
     screenshot(editor);
+
+    color_widgets::HarmonyColorWheel harwheel;
+    harwheel.resize(256, 256);
+    harwheel.setColor(demo_color);
+    harwheel.addHarmony(.333, true);
+    harwheel.addHarmony(.667, true);
+    screenshot(harwheel);
 
     if ( run )
         return a.exec();

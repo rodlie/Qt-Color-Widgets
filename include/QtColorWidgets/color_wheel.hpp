@@ -3,8 +3,7 @@
  *
  * \author Mattia Basaglia
  *
- * \copyright Copyright (C) 2013-2019 Mattia Basaglia
- * \copyright Copyright (C) 2017 caryoscelus
+ * \copyright Copyright (C) 2013-2020 Mattia Basaglia
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -23,9 +22,10 @@
 #ifndef COLOR_WHEEL_HPP
 #define COLOR_WHEEL_HPP
 
+#include <QWidget>
+
 #include "colorwidgets_global.hpp"
 
-#include <QWidget>
 
 namespace color_widgets {
 
@@ -198,10 +198,16 @@ protected:
     void dragEnterEvent(QDragEnterEvent* event) Q_DECL_OVERRIDE;
     void dropEvent(QDropEvent* event) Q_DECL_OVERRIDE;
 
-private:
+protected:
     class Private;
+    ColorWheel(QWidget *parent, Private* data);
+    Private* data() const { return p; }
+
+private:
     Private * const p;
+
 };
+
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ColorWheel::DisplayFlags)
 

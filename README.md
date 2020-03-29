@@ -17,6 +17,7 @@ The provided widgets are:
 * ColorPaletteWidget, A widget to use and manage a list of palettes
 * Color2DSlider,      An analog widget used to select 2 color components
 * ColorLineEdit,      A widget to manipulate a string representing a color
+* HarmonyColorWheel,  A ColorWheel which allows defining multiple colors, separated by hue
 
 they are all in the color_widgets namespace.
 
