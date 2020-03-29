@@ -59,7 +59,9 @@ ColorDialog::ColorDialog(QWidget *parent, Qt::WindowFlags f) :
 
     setButtonMode(OkApplyCancel);
 
-    connect(p->ui.wheel,&ColorWheel::displayFlagsChanged,this, &ColorDialog::wheelFlagsChanged);
+    connect(p->ui.wheel, &ColorWheel::colorSpaceChanged, this, &ColorDialog::colorSpaceChanged);
+    connect(p->ui.wheel, &ColorWheel::selectorShapeChanged, this, &ColorDialog::wheelShapeChanged);
+    connect(p->ui.wheel, &ColorWheel::rotatingSelectorChanged, this, &ColorDialog::wheelRotatingChanged);
 }
 
 ColorDialog::~ColorDialog()
@@ -70,11 +72,6 @@ ColorDialog::~ColorDialog()
 QSize ColorDialog::sizeHint() const
 {
     return QSize(400,0);
-}
-
-ColorWheel::DisplayFlags ColorDialog::wheelFlags() const
-{
-    return p->ui.wheel->displayFlags();
 }
 
 QColor ColorDialog::color() const
@@ -96,11 +93,6 @@ void ColorDialog::showColor(const QColor &c)
 {
     setColor(c);
     show();
-}
-
-void ColorDialog::setWheelFlags(ColorWheel::DisplayFlags flags)
-{
-    p->ui.wheel->setDisplayFlags(flags);
 }
 
 void ColorDialog::setPreviewDisplayMode(ColorPreview::DisplayMode mode)
@@ -351,6 +343,36 @@ void ColorDialog::mouseMoveEvent(QMouseEvent *event)
     {
         setColorInternal(get_screen_color(event->globalPos()));
     }
+}
+
+void ColorDialog::setWheelShape(ColorWheel::ShapeEnum shape)
+{
+    p->ui.wheel->setSelectorShape(shape);
+}
+
+ColorWheel::ShapeEnum ColorDialog::wheelShape() const
+{
+    return p->ui.wheel->selectorShape();
+}
+
+void ColorDialog::setColorSpace(ColorWheel::ColorSpaceEnum space)
+{
+    p->ui.wheel->setColorSpace(space);
+}
+
+ColorWheel::ColorSpaceEnum ColorDialog::colorSpace() const
+{
+    return p->ui.wheel->colorSpace();
+}
+
+void ColorDialog::setWheelRotating(bool rotating)
+{
+    p->ui.wheel->setRotatingSelector(rotating);
+}
+
+bool ColorDialog::wheelRotating() const
+{
+    return p->ui.wheel->rotatingSelector();
 }
 
 } // namespace color_widgets

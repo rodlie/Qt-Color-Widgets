@@ -30,8 +30,6 @@
 namespace color_widgets {
 
 
-static const ColorWheel::DisplayFlags hard_default_flags = ColorWheel::SHAPE_TRIANGLE|ColorWheel::ANGLE_ROTATING|ColorWheel::COLOR_HSV;
-static ColorWheel::DisplayFlags default_flags = hard_default_flags;
 static const double selector_radius = 6;
 
 
@@ -39,7 +37,6 @@ ColorWheel::ColorWheel(QWidget *parent, Private* data) :
     QWidget(parent), p(data)
 {
     p->setup();
-    setDisplayFlags(FLAGS_DEFAULT);
     setAcceptDrops(true);
 }
 
@@ -68,7 +65,7 @@ QSize ColorWheel::sizeHint() const
 
 qreal ColorWheel::hue() const
 {
-    if ( (p->display_flags & COLOR_LCH) && p->sat > 0.01 )
+    if ( p->color_space == ColorLCH && p->sat > 0.01 )
         return color().hueF();
     return p->hue;
 }
@@ -119,12 +116,12 @@ void ColorWheel::paintEvent(QPaintEvent * )
     painter.translate(p->selector_image_offset());
 
     QPointF selector_position;
-    if ( p->display_flags & SHAPE_SQUARE )
+    if ( p->selector_shape == ShapeSquare )
     {
         qreal side = p->square_size();
         selector_position = QPointF(p->sat*side, p->val*side);
     }
-    else if ( p->display_flags & SHAPE_TRIANGLE )
+    else if ( p->selector_shape == ShapeTriangle )
     {
         qreal side = p->triangle_side();
         qreal height = p->triangle_height();
@@ -182,12 +179,12 @@ void ColorWheel::mouseMoveEvent(QMouseEvent *ev)
         center_mouse_ln.setAngle(center_mouse_ln.angle()+p->selector_image_angle());
         center_mouse_ln.setP2(center_mouse_ln.p2()-p->selector_image_offset());
 
-        if ( p->display_flags & SHAPE_SQUARE )
+        if ( p->selector_shape == ShapeSquare )
         {
             p->sat = qBound(0.0, center_mouse_ln.x2()/p->square_size(), 1.0);
             p->val = qBound(0.0, center_mouse_ln.y2()/p->square_size(), 1.0);
         }
-        else if ( p->display_flags & SHAPE_TRIANGLE )
+        else if ( p->selector_shape == ShapeTriangle )
         {
             QPointF pt = center_mouse_ln.p2();
 
@@ -265,76 +262,78 @@ void ColorWheel::setValue(qreal v)
     update();
 }
 
-
-void ColorWheel::setDisplayFlags(DisplayFlags flags)
+color_widgets::ColorWheel::ColorSpaceEnum ColorWheel::colorSpace() const
 {
-    if ( ! (flags & COLOR_FLAGS) )
-        flags |= default_flags & COLOR_FLAGS;
-    if ( ! (flags & ANGLE_FLAGS) )
-        flags |= default_flags & ANGLE_FLAGS;
-    if ( ! (flags & SHAPE_FLAGS) )
-        flags |= default_flags & SHAPE_FLAGS;
+    return p->color_space;
+}
 
-    if ( (flags & COLOR_FLAGS) != (p->display_flags & COLOR_FLAGS) )
+bool ColorWheel::rotatingSelector() const
+{
+    return p->rotating_selector;
+}
+
+color_widgets::ColorWheel::ShapeEnum ColorWheel::selectorShape() const
+{
+    return p->selector_shape;
+}
+
+
+void ColorWheel::setColorSpace(color_widgets::ColorWheel::ColorSpaceEnum space)
+{
+    if ( p->color_space != space )
     {
+        p->color_space = space;
+
         QColor old_col = color();
-        if ( flags & ColorWheel::COLOR_HSL )
+
+        switch ( space )
         {
-            p->hue = old_col.hueF();
-            p->sat = detail::color_HSL_saturationF(old_col);
-            p->val = detail::color_lightnessF(old_col);
-            p->color_from = &detail::color_from_hsl;
-            p->rainbow_from_hue = &detail::rainbow_hsv;
+            case ColorHSL:
+                p->hue = old_col.hueF();
+                p->sat = detail::color_HSL_saturationF(old_col);
+                p->val = detail::color_lightnessF(old_col);
+                p->color_from = &detail::color_from_hsl;
+                p->rainbow_from_hue = &detail::rainbow_hsv;
+                break;
+            case ColorHSV:
+                p->hue = old_col.hsvHueF();
+                p->sat = old_col.hsvSaturationF();
+                p->val = old_col.valueF();
+                p->color_from = &QColor::fromHsvF;
+                p->rainbow_from_hue = &detail::rainbow_hsv;
+                break;
+            case ColorLCH:
+                p->hue = old_col.hueF();
+                p->sat = detail::color_chromaF(old_col);
+                p->val = detail::color_lumaF(old_col);
+                p->color_from = &detail::color_from_lch;
+                p->rainbow_from_hue = &detail::rainbow_lch;
+                break;
         }
-        else if ( flags & ColorWheel::COLOR_LCH )
-        {
-            p->hue = old_col.hueF();
-            p->sat = detail::color_chromaF(old_col);
-            p->val = detail::color_lumaF(old_col);
-            p->color_from = &detail::color_from_lch;
-            p->rainbow_from_hue = &detail::rainbow_lch;
-        }
-        else
-        {
-            p->hue = old_col.hsvHueF();
-            p->sat = old_col.hsvSaturationF();
-            p->val = old_col.valueF();
-            p->color_from = &QColor::fromHsvF;
-            p->rainbow_from_hue = &detail::rainbow_hsv;
-        }
+
         p->render_ring();
+        p->render_inner_selector();
+        update();
+        Q_EMIT colorSpaceChanged(space);
     }
+}
 
-    p->display_flags = flags;
-    p->render_inner_selector();
+void ColorWheel::setRotatingSelector(bool rotating)
+{
+    p->rotating_selector = rotating;
     update();
-    Q_EMIT displayFlagsChanged(flags);
+    Q_EMIT rotatingSelectorChanged(rotating);
 }
 
-ColorWheel::DisplayFlags ColorWheel::displayFlags(DisplayFlags mask) const
+void ColorWheel::setSelectorShape(color_widgets::ColorWheel::ShapeEnum shape)
 {
-    return p->display_flags & mask;
-}
-
-void ColorWheel::setDefaultDisplayFlags(DisplayFlags flags)
-{
-    if ( !(flags & COLOR_FLAGS) )
-        flags |= hard_default_flags & COLOR_FLAGS;
-    if ( !(flags & ANGLE_FLAGS) )
-        flags |= hard_default_flags & ANGLE_FLAGS;
-    if ( !(flags & SHAPE_FLAGS) )
-        flags |= hard_default_flags & SHAPE_FLAGS;
-    default_flags = flags;
-}
-
-ColorWheel::DisplayFlags ColorWheel::defaultDisplayFlags(DisplayFlags mask)
-{
-    return default_flags & mask;
-}
-
-void ColorWheel::setDisplayFlag(DisplayFlags flag, DisplayFlags mask)
-{
-    setDisplayFlags((p->display_flags&~mask)|flag);
+    if ( shape != p->selector_shape )
+    {
+        p->selector_shape = shape;
+        update();
+        p->render_inner_selector();
+        Q_EMIT selectorShapeChanged(shape);
+    }
 }
 
 void ColorWheel::dragEnterEvent(QDragEnterEvent* event)

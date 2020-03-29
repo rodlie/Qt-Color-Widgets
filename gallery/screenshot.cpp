@@ -103,6 +103,7 @@ int main(int argc, char *argv[])
     screenshot(preview);
 
     color_widgets::ColorDialog dialog;
+    dialog.setColorSpace(color_widgets::ColorWheel::ColorLCH);
     dialog.setColor(demo_color);
     screenshot(dialog);
 

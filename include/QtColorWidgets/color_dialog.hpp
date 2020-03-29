@@ -37,7 +37,9 @@ class QCP_EXPORT ColorDialog : public QDialog
     Q_OBJECT
     Q_ENUMS(ButtonMode)
     Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged DESIGNABLE true)
-    Q_PROPERTY(ColorWheel::DisplayFlags wheelFlags READ wheelFlags WRITE setWheelFlags NOTIFY wheelFlagsChanged)
+    Q_PROPERTY(ColorWheel::ShapeEnum wheelShape READ wheelShape WRITE setWheelShape NOTIFY wheelShapeChanged)
+    Q_PROPERTY(ColorWheel::ColorSpaceEnum colorSpace READ colorSpace WRITE setColorSpace NOTIFY colorSpaceChanged)
+    Q_PROPERTY(bool wheelRotating READ wheelRotating WRITE setWheelRotating NOTIFY wheelRotatingChanged)
     /**
      * \brief whether the color alpha channel can be edited.
      *
@@ -86,7 +88,9 @@ public:
 
     QSize sizeHint() const;
 
-    ColorWheel::DisplayFlags wheelFlags() const;
+    ColorWheel::ShapeEnum wheelShape() const;
+    ColorWheel::ColorSpaceEnum colorSpace() const;
+    bool wheelRotating() const;
 
 public Q_SLOTS:
 
@@ -100,7 +104,9 @@ public Q_SLOTS:
      */
     void showColor(const QColor &oldcolor);
 
-    void setWheelFlags(ColorWheel::DisplayFlags flags);
+    void setWheelShape(ColorWheel::ShapeEnum shape);
+    void setColorSpace(ColorWheel::ColorSpaceEnum space);
+    void setWheelRotating(bool rotating);
 
     /**
      * Set whether the color alpha channel can be edited.
@@ -119,7 +125,10 @@ Q_SIGNALS:
      */
     void colorSelected(QColor);
 
-    void wheelFlagsChanged(ColorWheel::DisplayFlags flags);
+    void wheelShapeChanged(ColorWheel::ShapeEnum shape);
+    void colorSpaceChanged(ColorWheel::ColorSpaceEnum space);
+    void wheelRotatingChanged(bool rotating);
+
     void alphaEnabledChanged(bool alphaEnabled);
 
 private Q_SLOTS:

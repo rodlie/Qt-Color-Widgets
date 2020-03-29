@@ -49,7 +49,9 @@ public:
     QPixmap hue_ring;
     QImage inner_selector;
     std::vector<uint32_t> inner_selector_buffer;
-    DisplayFlags display_flags;
+    ColorSpaceEnum color_space = ColorHSV;
+    bool rotating_selector = true;
+    ShapeEnum selector_shape = ShapeTriangle;
     QColor (*color_from)(qreal,qreal,qreal,qreal);
     QColor (*rainbow_from_hue)(qreal);
     int max_size = 128;
@@ -57,7 +59,6 @@ public:
     Private(ColorWheel *widget)
         : w(widget), hue(0), sat(0), val(0),
         wheel_width(20), mouse_status(Nothing),
-        display_flags(FLAGS_DEFAULT),
         color_from(&QColor::fromHsvF), rainbow_from_hue(&detail::rainbow_hsv)
     {
     }
@@ -171,7 +172,7 @@ public:
     /// Updates the inner image that displays the saturation-value selector
     void render_inner_selector()
     {
-        if ( display_flags & ColorWheel::SHAPE_TRIANGLE )
+        if ( selector_shape == ShapeTriangle )
             render_triangle();
         else
             render_square();
@@ -180,7 +181,7 @@ public:
     /// Offset of the selector image
     QPointF selector_image_offset()
     {
-        if ( display_flags & SHAPE_TRIANGLE )
+        if ( selector_shape == ShapeTriangle )
                 return QPointF(-inner_radius(),-triangle_side()/2);
         return QPointF(-square_size()/2,-square_size()/2);
     }
@@ -190,7 +191,7 @@ public:
      */
     QSizeF selector_size()
     {
-        if ( display_flags & SHAPE_TRIANGLE )
+        if ( selector_shape == ShapeTriangle )
                 return QSizeF(triangle_height(), triangle_side());
         return QSizeF(square_size(), square_size());
     }
@@ -199,15 +200,15 @@ public:
     /// Rotation of the selector image
     qreal selector_image_angle()
     {
-        if ( display_flags & SHAPE_TRIANGLE )
+        if ( selector_shape == ShapeTriangle )
         {
-            if ( display_flags & ANGLE_ROTATING )
+            if ( rotating_selector )
                 return -hue*360-60;
             return -150;
         }
         else
         {
-            if ( display_flags & ANGLE_ROTATING )
+            if ( rotating_selector )
                 return -hue*360-45;
             else
                 return 180;
@@ -247,23 +248,23 @@ public:
 
     void set_color(const QColor& c)
     {
-        if ( display_flags & ColorWheel::COLOR_HSV )
+        switch ( color_space )
         {
-            hue = qMax(0.0, c.hsvHueF());
-            sat = c.hsvSaturationF();
-            val = c.valueF();
-        }
-        else if ( display_flags & ColorWheel::COLOR_HSL )
-        {
-            hue = qMax(0.0, c.hueF());
-            sat = detail::color_HSL_saturationF(c);
-            val = detail::color_lightnessF(c);
-        }
-        else if ( display_flags & ColorWheel::COLOR_LCH )
-        {
-            hue = qMax(0.0, c.hsvHueF());
-            sat = detail::color_chromaF(c);
-            val = detail::color_lumaF(c);
+            case ColorHSV:
+                hue = qMax(0.0, c.hsvHueF());
+                sat = c.hsvSaturationF();
+                val = c.valueF();
+                break;
+            case ColorHSL:
+                hue = qMax(0.0, c.hueF());
+                sat = detail::color_HSL_saturationF(c);
+                val = detail::color_lightnessF(c);
+                break;
+            case ColorLCH:
+                hue = qMax(0.0, c.hsvHueF());
+                sat = detail::color_chromaF(c);
+                val = detail::color_lumaF(c);
+                break;
         }
     }
 
