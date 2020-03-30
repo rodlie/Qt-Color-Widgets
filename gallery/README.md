@@ -81,8 +81,11 @@ GradientEditor
 **GradientEditor** is similar in appearance to **GradientSlider** but it's for editing the gradient.
 
 
-GradientListModel
------------------
-![GradientListModel](GradientListModel.png)
+GradientListModel and GradientDelegate
+--------------------------------------
+![GradientListModel](GradientListModel_combo.png)
+![GradientListModel](GradientListModel_view.png)
 
-**GradientListModel** is a <tt>QAbstractListModel</tt> used to list gradients (useful for combo boxes, list views and the like).
+**GradientListModel** is a <tt>QAbstractListModel</tt> used to list gradients (useful for combo boxes, item views and the like).
+
+**GradientDelegate** is an item delegate to edit gradients in an item view.

@@ -35,6 +35,7 @@ public:
     QVector<QLinearGradient> gradients;
     QSize icon_size{48, 32};
     QBrush background;
+    ItemEditMode edit_mode = EditNone;
 
     Private()
     {
@@ -239,6 +240,12 @@ QVariant color_widgets::GradientListModel::data ( const QModelIndex& index, int 
             return d->preview(gradient);
         case Qt::ToolTipRole:
             return tr("%1 (%2 colors)").arg(iter.key()).arg(gradient.stops().size());
+        case Qt::EditRole:
+            if ( d->edit_mode == EditGradient )
+                return QBrush(gradient);
+            else if ( d->edit_mode == EditName )
+                return iter.key();
+            return {};
     }
 
     return QVariant();
@@ -255,6 +262,8 @@ bool color_widgets::GradientListModel::rename(int index, const QString& new_name
         {
             d->indices.erase(it);
             d->indices[new_name] = index;
+            QModelIndex mindex = createIndex(index, 0);
+            Q_EMIT dataChanged(mindex, mindex, {Qt::DisplayRole, Qt::ToolTipRole});
             return true;
         }
     }
@@ -273,9 +282,56 @@ bool color_widgets::GradientListModel::rename(const QString& old_name, const QSt
         int index = *it;
         d->indices.erase(it);
         d->indices[new_name] = index;
+        QModelIndex mindex = createIndex(index, 0);
+        Q_EMIT dataChanged(mindex, mindex, {Qt::DisplayRole, Qt::ToolTipRole});
         return true;
     }
 
     return false;
+}
+
+Qt::ItemFlags color_widgets::GradientListModel::flags(const QModelIndex& index) const
+{
+    auto flags = QAbstractListModel::flags(index);
+    if ( d->edit_mode )
+        flags |= Qt::ItemIsEditable;
+    return flags;
+}
+
+bool color_widgets::GradientListModel::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+    if ( !d->acceptable(index) )
+        return false;
+
+    if ( role == Qt::DisplayRole )
+    {
+        return rename(index.row(), value.toString());
+    }
+    else if ( role == Qt::EditRole )
+    {
+        if ( d->edit_mode == EditName )
+            return rename(index.row(), value.toString());
+
+        if ( d->edit_mode == EditGradient )
+        {
+            const QGradient* grad = value.value<QBrush>().gradient();
+            if ( !grad )
+                return false;
+            return setGradient(index.row(), *grad);
+        }
+    }
+
+    return false;
+}
+
+color_widgets::GradientListModel::ItemEditMode color_widgets::GradientListModel::editMode() const
+{
+    return d->edit_mode;
+}
+
+void color_widgets::GradientListModel::setEditMode(color_widgets::GradientListModel::ItemEditMode mode)
+{
+    d->edit_mode = mode;
+    Q_EMIT editModeChanged(mode);
 }
 

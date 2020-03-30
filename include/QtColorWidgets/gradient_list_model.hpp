@@ -39,12 +39,24 @@ class QCP_EXPORT GradientListModel : public QAbstractListModel
      */
     Q_PROPERTY(QSize iconSize READ iconSize WRITE setIconSize NOTIFY iconSizeChanged)
 
+    Q_PROPERTY(ItemEditMode editMode READ editMode WRITE setEditMode NOTIFY editModeChanged)
 
 public:
+    enum ItemEditMode
+    {
+        EditNone = 0,
+        EditName,
+        EditGradient,
+    };
+
+    Q_ENUM(ItemEditMode);
+
     GradientListModel(QObject *parent = nullptr);
     ~GradientListModel();
     int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+    Qt::ItemFlags flags(const QModelIndex & index) const Q_DECL_OVERRIDE;
+    bool setData(const QModelIndex & index, const QVariant & value, int role) Q_DECL_OVERRIDE;
 
     QSize iconSize() const;
 
@@ -129,11 +141,15 @@ public:
      */
     int indexFromName(const QString& name) const;
 
+    ItemEditMode editMode() const;
+
 public Q_SLOTS:
     void setIconSize(const QSize& iconSize);
+    void setEditMode(ItemEditMode mode);
 
 Q_SIGNALS:
     void iconSizeChanged(const QSize& iconSize);
+    void editModeChanged(ItemEditMode mode);
 
 private:
     class Private;

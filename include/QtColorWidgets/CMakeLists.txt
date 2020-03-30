@@ -20,6 +20,7 @@ swatch.hpp
 gradient_editor.hpp
 harmony_color_wheel.hpp
 gradient_list_model.hpp
+gradient_delegate.hpp
 )
 
 file(RELATIVE_PATH

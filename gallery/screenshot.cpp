@@ -25,6 +25,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QComboBox>
+#include <QListView>
 
 #include "QtColorWidgets/color_2d_slider.hpp"
 #include "QtColorWidgets/color_delegate.hpp" /// \todo show it
@@ -38,6 +39,7 @@
 #include "QtColorWidgets/hue_slider.hpp"
 #include "QtColorWidgets/gradient_editor.hpp"
 #include "QtColorWidgets/gradient_list_model.hpp"
+#include "QtColorWidgets/gradient_delegate.hpp"
 
 bool run = false;
 QStringList just_these;
@@ -173,7 +175,16 @@ int main(int argc, char *argv[])
     QObject::connect(&editor, &color_widgets::GradientEditor::stopsChanged, &gradient_model,
             [&gradient_model](const QGradientStops& stops){ gradient_model.setGradient("Rainbow", stops); });
     gradient_list.resize(gradient_list.sizeHint());
-    screenshot(gradient_list, "GradientListModel");
+    screenshot(gradient_list, "GradientListModel_combo");
+
+    QListView gradient_view;
+    color_widgets::GradientDelegate gradient_delegate;
+    gradient_view.setItemDelegate(&gradient_delegate);
+    gradient_view.setModel(&gradient_model);
+//     gradient_model.setEditMode(color_widgets::GradientListModel::EditName);
+    gradient_model.setEditMode(color_widgets::GradientListModel::EditGradient);
+    gradient_view.resize(QSize(gradient_view.sizeHintForColumn(0) + 4, gradient_view.sizeHint().height()));
+    screenshot(gradient_view, "GradientListModel_view");
 
     color_widgets::HarmonyColorWheel harwheel;
     harwheel.resize(256, 256);
