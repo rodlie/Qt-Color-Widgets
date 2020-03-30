@@ -24,6 +24,7 @@
 
 #include <QApplication>
 #include <QCommandLineParser>
+#include <QComboBox>
 
 #include "QtColorWidgets/color_2d_slider.hpp"
 #include "QtColorWidgets/color_delegate.hpp" /// \todo show it
@@ -36,6 +37,7 @@
 #include "QtColorWidgets/harmony_color_wheel.hpp"
 #include "QtColorWidgets/hue_slider.hpp"
 #include "QtColorWidgets/gradient_editor.hpp"
+#include "QtColorWidgets/gradient_list_model.hpp"
 
 bool run = false;
 QStringList just_these;
@@ -155,11 +157,23 @@ int main(int argc, char *argv[])
 
     color_widgets::GradientEditor editor;
     QGradientStops gradient_colors;
-    float n_colors = 6;
+    float n_colors = 4;
     for ( int i = 0; i <= n_colors; ++i )
         gradient_colors.append(QGradientStop(i/n_colors, QColor::fromHsvF(i/n_colors, 0.5, 1)));
     editor.setStops(gradient_colors);
     screenshot(editor);
+
+    QComboBox gradient_list;
+    color_widgets::GradientListModel gradient_model;
+    gradient_model.setGradient("Rainbow", gradient_colors);
+    gradient_model.setGradient("Black to Transparent", QGradientStops{{0, Qt::black}, {1, QColor(0, 0, 0, 0)}});
+    gradient_list.setModel(&gradient_model);
+    gradient_model.setIconSize(QSize(128, 24));
+    gradient_list.setIconSize(gradient_model.iconSize());
+    QObject::connect(&editor, &color_widgets::GradientEditor::stopsChanged, &gradient_model,
+            [&gradient_model](const QGradientStops& stops){ gradient_model.setGradient("Rainbow", stops); });
+    gradient_list.resize(gradient_list.sizeHint());
+    screenshot(gradient_list, "GradientListModel");
 
     color_widgets::HarmonyColorWheel harwheel;
     harwheel.resize(256, 256);

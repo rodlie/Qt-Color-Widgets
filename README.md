@@ -18,6 +18,7 @@ The provided widgets are:
 * Color2DSlider,      An analog widget used to select 2 color components
 * ColorLineEdit,      A widget to manipulate a string representing a color
 * HarmonyColorWheel,  A ColorWheel which allows defining multiple colors, separated by hue
+* GradientListModel,  A QAbstractListModel used to list gradients (useful for combo boxes, list views and the like)
 
 they are all in the color_widgets namespace.
 

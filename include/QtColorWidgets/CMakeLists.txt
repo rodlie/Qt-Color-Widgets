@@ -19,6 +19,7 @@ hue_slider.hpp
 swatch.hpp
 gradient_editor.hpp
 harmony_color_wheel.hpp
+gradient_list_model.hpp
 )
 
 file(RELATIVE_PATH

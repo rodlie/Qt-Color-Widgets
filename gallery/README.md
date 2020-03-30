@@ -79,3 +79,10 @@ GradientEditor
 ![GradientEditor](GradientEditor.png)
 
 **GradientEditor** is similar in appearance to **GradientSlider** but it's for editing the gradient.
+
+
+GradientListModel
+-----------------
+![GradientListModel](GradientListModel.png)
+
+**GradientListModel** is a <tt>QAbstractListModel</tt> used to list gradients (useful for combo boxes, list views and the like).

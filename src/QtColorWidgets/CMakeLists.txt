@@ -20,7 +20,8 @@ gradient_slider.cpp
 hue_slider.cpp
 swatch.cpp
 gradient_editor.cpp
-  harmony_color_wheel.cpp
+harmony_color_wheel.cpp
+gradient_list_model.cpp
 )
 
 file(RELATIVE_PATH
