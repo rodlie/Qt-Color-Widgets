@@ -31,8 +31,13 @@ using namespace color_widgets;
 class GradientListModel::Private
 {
 public:
-    QMap<QString, int> indices;
-    QVector<QLinearGradient> gradients;
+    struct Gradient
+    {
+        QLinearGradient gradient;
+        QString name;
+    };
+
+    QVector<Gradient> gradients;
     QSize icon_size{48, 32};
     QBrush background;
     ItemEditMode edit_mode = EditNone;
@@ -42,6 +47,19 @@ public:
         background.setTexture(QPixmap(QStringLiteral(":/color_widgets/alphaback.png")));
     }
 
+    int find(const QString& name)
+    {
+        for ( int i = 0; i < gradients.size(); i++ )
+            if ( gradients[0].name == name )
+                return i;
+        return -1;
+    }
+
+    bool contains(const QString& name)
+    {
+        return find(name) != -1;
+    }
+
     bool acceptable(const QModelIndex& index) const
     {
         return acceptable(index.row());
@@ -49,7 +67,7 @@ public:
 
     bool acceptable(int row) const
     {
-        return row >= 0 && row <= gradients.size();
+        return row >= 0 && row < gradients.size();
     }
 
     QPixmap preview(const QLinearGradient& grad)
@@ -111,16 +129,15 @@ int color_widgets::GradientListModel::setGradient ( const QString& name, const Q
 
 int color_widgets::GradientListModel::setGradient ( const QString& name, const QGradientStops& gradient_stops )
 {
-    auto iter = d->indices.find(name);
-    if ( iter != d->indices.end() )
+    int index = d->find(name);
+    if ( index != -1 )
     {
-        return setGradient(*iter, gradient_stops);
+        return setGradient(index, gradient_stops);
     }
 
-    int index = d->gradients.size();
+    index = d->gradients.size();
     beginInsertRows(QModelIndex(), index, index);
-    d->gradients.push_back(d->make_gradient(gradient_stops));
-    d->indices[name] = index;
+    d->gradients.push_back({d->make_gradient(gradient_stops), name});
     endInsertRows();
     return index;
 }
@@ -135,7 +152,7 @@ bool color_widgets::GradientListModel::setGradient(int index, const QGradientSto
     if ( index < 0 || index > d->gradients.size() )
         return false;
 
-    d->gradients[index].setStops(gradient_stops);
+    d->gradients[index].gradient.setStops(gradient_stops);
     QModelIndex mindex = createIndex(index, 0);
     Q_EMIT dataChanged(mindex, mindex, {Qt::DecorationRole, Qt::ToolTipRole});
     return true;
@@ -145,35 +162,32 @@ bool color_widgets::GradientListModel::setGradient(int index, const QGradientSto
 
 QGradientStops color_widgets::GradientListModel::gradientStops ( const QString& name ) const
 {
-    auto iter = d->indices.find(name);
-    if ( iter != d->indices.end() )
-        return d->gradients[*iter].stops();
+    auto iter = d->find(name);
+    if ( iter != -1 )
+        return d->gradients[iter].gradient.stops();
     return {};
 }
 
 QGradientStops color_widgets::GradientListModel::gradientStops ( int index ) const
 {
-    if ( index > 0 && index < d->gradients.size() )
-        return d->gradients[index].stops();
+    if ( d->acceptable(index) )
+        return d->gradients[index].gradient.stops();
     return {};
 }
 
 const QLinearGradient & color_widgets::GradientListModel::gradient ( int index ) const
 {
-    return d->gradients[index];
+    return d->gradients[index].gradient;
 }
 
 const QLinearGradient & color_widgets::GradientListModel::gradient ( const QString& name ) const
 {
-    return d->gradients[d->indices[name]];
+    return d->gradients[d->find(name)].gradient;
 }
 
 int color_widgets::GradientListModel::indexFromName ( const QString& name ) const
 {
-    auto iter = d->indices.find(name);
-    if ( iter != d->indices.end() )
-        return *iter;
-    return -1;
+    return d->find(name);
 }
 
 int color_widgets::GradientListModel::rowCount ( const QModelIndex& ) const
@@ -183,43 +197,23 @@ int color_widgets::GradientListModel::rowCount ( const QModelIndex& ) const
 
 bool color_widgets::GradientListModel::hasGradient ( const QString& name ) const
 {
-    auto iter = d->indices.find(name);
-    if ( iter != d->indices.end() )
-        return true;
-    return false;
+    return d->contains(name);
 }
 
 bool color_widgets::GradientListModel::removeGradient ( int index )
 {
-    if ( index < 0 || index >= d->indices.size() )
+    if ( !d->acceptable(index) )
         return false;
 
     beginRemoveRows(QModelIndex{}, index, index);
     d->gradients.erase(d->gradients.begin() + index);
-    for ( auto it = d->indices.begin(); it != d->indices.end(); ++it )
-    {
-        if ( *it == index )
-        {
-            d->indices.erase(it);
-            break;
-        }
-    }
     endRemoveRows();
     return true;
 }
 
 bool color_widgets::GradientListModel::removeGradient ( const QString& name )
 {
-    auto iter = d->indices.find(name);
-    if ( iter != d->indices.end() )
-        return false;
-
-    int index = *iter;
-    beginRemoveRows(QModelIndex{}, index, index);
-    d->gradients.erase(d->gradients.begin() + index);
-    d->indices.erase(iter);
-    endRemoveRows();
-    return true;
+    return removeGradient(d->find(name));
 }
 
 QVariant color_widgets::GradientListModel::data ( const QModelIndex& index, int role ) const
@@ -228,23 +222,20 @@ QVariant color_widgets::GradientListModel::data ( const QModelIndex& index, int 
         return QVariant();
 
 
-    auto iter = d->indices.begin();
-    while ( *iter != index.row() )
-        ++iter;
-    const QLinearGradient& gradient = d->gradients[index.row()];
+    const auto& gradient = d->gradients[index.row()];
     switch( role )
     {
         case Qt::DisplayRole:
-            return iter.key();
+            return gradient.name;
         case Qt::DecorationRole:
-            return d->preview(gradient);
+            return d->preview(gradient.gradient);
         case Qt::ToolTipRole:
-            return tr("%1 (%2 colors)").arg(iter.key()).arg(gradient.stops().size());
+            return tr("%1 (%2 colors)").arg(gradient.name).arg(gradient.gradient.stops().size());
         case Qt::EditRole:
             if ( d->edit_mode == EditGradient )
-                return QBrush(gradient);
+                return QBrush(gradient.gradient);
             else if ( d->edit_mode == EditName )
-                return iter.key();
+                return gradient.name;
             return {};
     }
 
@@ -253,41 +244,18 @@ QVariant color_widgets::GradientListModel::data ( const QModelIndex& index, int 
 
 bool color_widgets::GradientListModel::rename(int index, const QString& new_name)
 {
-    if ( d->indices.contains(new_name) )
+    if ( !d->acceptable(index) || d->contains(new_name) )
         return false;
 
-    for ( auto it = d->indices.begin(); it != d->indices.end(); ++it )
-    {
-        if ( *it == index )
-        {
-            d->indices.erase(it);
-            d->indices[new_name] = index;
-            QModelIndex mindex = createIndex(index, 0);
-            Q_EMIT dataChanged(mindex, mindex, {Qt::DisplayRole, Qt::ToolTipRole});
-            return true;
-        }
-    }
-
-    return false;
+    QModelIndex mindex = createIndex(index, 0);
+    d->gradients[index].name = new_name;
+    Q_EMIT dataChanged(mindex, mindex, {Qt::DisplayRole, Qt::ToolTipRole});
+    return true;
 }
 
 bool color_widgets::GradientListModel::rename(const QString& old_name, const QString& new_name)
 {
-    if ( d->indices.contains(new_name) )
-        return false;
-
-    auto it = d->indices.find(old_name);
-    if ( it != d->indices.end() )
-    {
-        int index = *it;
-        d->indices.erase(it);
-        d->indices[new_name] = index;
-        QModelIndex mindex = createIndex(index, 0);
-        Q_EMIT dataChanged(mindex, mindex, {Qt::DisplayRole, Qt::ToolTipRole});
-        return true;
-    }
-
-    return false;
+    return rename(d->find(old_name), new_name);
 }
 
 Qt::ItemFlags color_widgets::GradientListModel::flags(const QModelIndex& index) const
