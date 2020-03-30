@@ -243,3 +243,39 @@ QVariant color_widgets::GradientListModel::data ( const QModelIndex& index, int 
 
     return QVariant();
 }
+
+bool color_widgets::GradientListModel::rename(int index, const QString& new_name)
+{
+    if ( d->indices.contains(new_name) )
+        return false;
+
+    for ( auto it = d->indices.begin(); it != d->indices.end(); ++it )
+    {
+        if ( *it == index )
+        {
+            d->indices.erase(it);
+            d->indices[new_name] = index;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool color_widgets::GradientListModel::rename(const QString& old_name, const QString& new_name)
+{
+    if ( d->indices.contains(new_name) )
+        return false;
+
+    auto it = d->indices.find(old_name);
+    if ( it != d->indices.end() )
+    {
+        int index = *it;
+        d->indices.erase(it);
+        d->indices[new_name] = index;
+        return true;
+    }
+
+    return false;
+}
+

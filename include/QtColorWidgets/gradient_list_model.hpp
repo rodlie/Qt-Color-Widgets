@@ -103,6 +103,18 @@ public:
     bool setGradient(int index, const QGradientStops& gradient);
 
     /**
+     * \brief Renames the gradient at \p index
+     * \returns \b true on success
+     */
+    bool rename(int index, const QString& new_name);
+
+    /**
+     * \brief Renames a gradient
+     * \returns \b true on success
+     */
+    bool rename(const QString& old_name, const QString& new_name);
+
+    /**
      * \brief Remove a gradient from the model
      * \returns \b true if the gradient has been successfully removed
      */
