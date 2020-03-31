@@ -26,6 +26,7 @@
 #include <QCommandLineParser>
 #include <QComboBox>
 #include <QListView>
+#include <QTableWidget>
 
 #include "QtColorWidgets/color_2d_slider.hpp"
 #include "QtColorWidgets/color_delegate.hpp" /// \todo show it
@@ -128,6 +129,13 @@ int main(int argc, char *argv[])
     wheel.setColor(demo_color);
     screenshot(wheel);
 
+    color_widgets::HarmonyColorWheel harwheel;
+    harwheel.resize(256, 256);
+    harwheel.setColor(demo_color);
+    harwheel.addHarmony(.333, true);
+    harwheel.addHarmony(.667, true);
+    screenshot(harwheel);
+
     color_widgets::Swatch swatch;
     swatch.setPalette(palette1);
     swatch.resize(swatch.sizeHint());
@@ -186,12 +194,17 @@ int main(int argc, char *argv[])
     gradient_view.resize(QSize(gradient_view.sizeHintForColumn(0) + 4, gradient_view.sizeHint().height()));
     screenshot(gradient_view, "GradientListModel_view");
 
-    color_widgets::HarmonyColorWheel harwheel;
-    harwheel.resize(256, 256);
-    harwheel.setColor(demo_color);
-    harwheel.addHarmony(.333, true);
-    harwheel.addHarmony(.667, true);
-    screenshot(harwheel);
+    QTableWidget gradient_table;
+    gradient_table.setItemDelegate(&gradient_delegate);
+    gradient_table.setRowCount(2);
+    gradient_table.setColumnCount(2);
+    gradient_table.setItem(0, 0, new QTableWidgetItem());
+    gradient_table.item(0, 0)->setData(Qt::EditRole, QVariant::fromValue(gradient_model.gradientBrush(0)));
+    gradient_table.setItem(0, 1, new QTableWidgetItem(gradient_model.nameFromIndex(0)));
+    gradient_table.setItem(1, 0, new QTableWidgetItem());
+    gradient_table.item(1, 0)->setData(Qt::EditRole, QVariant::fromValue(gradient_model.gradientBrush(1)));
+    gradient_table.setItem(1, 1, new QTableWidgetItem(gradient_model.nameFromIndex(1)));
+    screenshot(gradient_table, "GradientDelegate_table");
 
     if ( run )
         return a.exec();

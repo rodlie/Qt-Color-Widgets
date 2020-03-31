@@ -141,7 +141,18 @@ public:
      */
     int indexFromName(const QString& name) const;
 
+    /**
+     * \brief Name of the gradient at index
+     */
+    QString nameFromIndex(int index) const;
+
     ItemEditMode editMode() const;
+
+    /**
+     * \brief Brush for a gradient
+     * \pre 0 <= \p index < count()
+     */
+    QBrush gradientBrush(int index) const;
 
 public Q_SLOTS:
     void setIconSize(const QSize& iconSize);

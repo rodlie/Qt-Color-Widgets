@@ -303,3 +303,17 @@ void color_widgets::GradientListModel::setEditMode(color_widgets::GradientListMo
     Q_EMIT editModeChanged(mode);
 }
 
+QBrush color_widgets::GradientListModel::gradientBrush(int index) const
+{
+    if ( d->acceptable(index) )
+        return QBrush(d->gradients[index].gradient);
+    return {};
+}
+
+QString color_widgets::GradientListModel::nameFromIndex(int index) const
+{
+    if ( d->acceptable(index) )
+        return d->gradients[index].name;
+    return {};
+}
+

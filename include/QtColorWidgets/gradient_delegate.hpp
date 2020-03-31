@@ -25,6 +25,7 @@
 
 
 #include <QStyledItemDelegate>
+#include <QPainter>
 
 #include "QtColorWidgets/gradient_editor.hpp"
 
@@ -63,6 +64,37 @@ public:
             model->setData(index, QBrush(editor->gradient()), Qt::EditRole);
         else
             QStyledItemDelegate::setModelData(widget, model, index);
+    }
+
+    void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const Q_DECL_OVERRIDE
+    {
+        QVariant display_data = index.data(Qt::DisplayRole);
+        QVariant gradient_data = display_data.isValid() ? display_data : index.data(Qt::EditRole);
+        if ( gradient_data.canConvert<QBrush>() )
+        {
+            QBrush brush = gradient_data.value<QBrush>();
+            if ( brush.gradient() )
+            {
+                QBrush background;
+                background.setTexture(QPixmap(QStringLiteral(":/color_widgets/alphaback.png")));
+                painter->fillRect(option.rect, background);
+
+                QLinearGradient g(option.rect.topLeft(), option.rect.topRight());
+                g.setStops(brush.gradient()->stops());
+                painter->fillRect(option.rect, g);
+
+                if ( option.state & QStyle::State_Selected )
+                {
+                    int border = 2;
+                    painter->setBrush(Qt::transparent);
+                    painter->setPen(QPen(option.palette.highlight(), border));
+                    painter->drawRect(option.rect.adjusted(border/2, border/2, -border/2, -border/2));
+                }
+                return;
+            }
+        }
+
+        QStyledItemDelegate::paint(painter, option, index);
     }
 };
 
