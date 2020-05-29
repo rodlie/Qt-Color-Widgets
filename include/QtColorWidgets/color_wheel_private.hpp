@@ -25,6 +25,7 @@
 #include "QtColorWidgets/color_utils.hpp"
 
 #include <QPainter>
+#include <QPainterPath>
 #include <QMouseEvent>
 
 namespace color_widgets {
