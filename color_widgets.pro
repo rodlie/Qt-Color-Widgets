@@ -21,7 +21,7 @@ DEFINES += QTCOLORWIDGETS_LIBRARY
 
 TARGET=QtColorWidgets-Qt5
 
-VERSION=2.0.0
+VERSION=2.2.0
 
 OBJECTS_DIR = out/obj
 MOC_DIR = out/generated
