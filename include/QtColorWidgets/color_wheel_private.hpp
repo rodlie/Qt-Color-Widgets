@@ -249,20 +249,26 @@ public:
 
     void set_color(const QColor& c)
     {
+        float nice_hue = c.hsvHueF();
+        if ( nice_hue < 0 )
+            nice_hue = c.hslHueF();
+        if ( nice_hue < 0 )
+            nice_hue = hue;
+
         switch ( color_space )
         {
             case ColorHSV:
-                hue = qMax(0.0, c.hsvHueF());
+                hue = nice_hue;
                 sat = c.hsvSaturationF();
                 val = c.valueF();
                 break;
             case ColorHSL:
-                hue = qMax(0.0, c.hueF());
+                hue = nice_hue;
                 sat = detail::color_HSL_saturationF(c);
                 val = detail::color_lightnessF(c);
                 break;
             case ColorLCH:
-                hue = qMax(0.0, c.hsvHueF());
+                hue = nice_hue;
                 sat = detail::color_chromaF(c);
                 val = detail::color_lumaF(c);
                 break;
