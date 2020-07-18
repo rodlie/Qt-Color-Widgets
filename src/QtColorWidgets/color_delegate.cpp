@@ -28,14 +28,14 @@
 namespace color_widgets {
 
 ColorDelegate::ColorDelegate(QWidget *parent) :
-    QAbstractItemDelegate(parent)
+    QStyledItemDelegate(parent)
 {
 }
 
 void ColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                            const QModelIndex &index) const
 {
-    if (index.data().canConvert<QColor>())
+    if ( index.data().type() == QVariant::Color )
     {
         QStyleOptionFrame panel;
         panel.initFrom(option.widget);
@@ -47,8 +47,11 @@ void ColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
         panel.state |= QStyle::State_Sunken;
         option.widget->style()->drawPrimitive(QStyle::PE_Frame, &panel, painter, nullptr);
         QRect r = option.widget->style()->subElementRect(QStyle::SE_FrameContents, &panel, nullptr);
-        painter->setClipRect(r);
-        painter->fillRect(option.rect, index.data().value<QColor>());
+        painter->fillRect(r, index.data().value<QColor>());
+    }
+    else
+    {
+        QStyledItemDelegate::paint(painter, option, index);
     }
 }
 
@@ -58,7 +61,7 @@ bool ColorDelegate::editorEvent(QEvent* event,
                                 const QModelIndex& index)
 {
 
-    if ( event->type() == QEvent::MouseButtonRelease && index.data().canConvert<QColor>())
+    if ( event->type() == QEvent::MouseButtonRelease && index.data().type() == QVariant::Color )
     {
         QMouseEvent* mouse_event = static_cast<QMouseEvent*>(event);
 
@@ -80,15 +83,15 @@ bool ColorDelegate::editorEvent(QEvent* event,
         return true;
     }
 
-    return QAbstractItemDelegate::editorEvent(event, model, option, index);
+    return QStyledItemDelegate::editorEvent(event, model, option, index);
 }
 
 
 QSize ColorDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    Q_UNUSED(index)
-    Q_UNUSED(option)
-    return QSize(24,16);
+    if ( index.data().type() == QVariant::Color )
+        return QSize(24,16);
+    return QStyledItemDelegate::sizeHint(option, index);
 }
 
 } // namespace color_widgets

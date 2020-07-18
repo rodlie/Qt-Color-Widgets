@@ -24,14 +24,14 @@
 
 #include "colorwidgets_global.hpp"
 
-#include <QAbstractItemDelegate>
+#include <QStyledItemDelegate>
 
 namespace color_widgets {
 
 /**
     Delegate to use a ColorSelector in a color list
 */
-class QCP_EXPORT ColorDelegate : public QAbstractItemDelegate
+class QCP_EXPORT ColorDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
