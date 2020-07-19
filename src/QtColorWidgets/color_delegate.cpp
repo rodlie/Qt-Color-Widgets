@@ -69,7 +69,6 @@ bool ColorDelegate::editorEvent(QEvent* event,
             ( index.flags() & Qt::ItemIsEditable) )
         {
             ColorDialog *editor = new ColorDialog(const_cast<QWidget*>(option.widget));
-            connect(this, &QObject::destroyed, editor, &QObject::deleteLater);
             editor->setMinimumSize(editor->sizeHint());
             auto original_color = index.data().value<QColor>();
             editor->setColor(original_color);
