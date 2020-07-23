@@ -67,7 +67,13 @@ option(BUILD_SHARED_LIBS "Build the shared library" ON)
 option(BUILD_STATIC_LIBS "Build the static library" OFF)
 
 set (TARGET_NAME ${COLORWIDGET_PROJECT_NAME})
-set (TARGET_OUTPUT_SUFFIX "-Qt${QT_VERSION}${${COLORWIDGET_PROJECT_NAME}_VERSION_MAJOR}")
+option(COLOR_WIDGETS_QT_SUFFIX "Append qt version to the target output files" OFF)
+if ( COLOR_WIDGETS_QT_SUFFIX )
+    set (TARGET_OUTPUT_SUFFIX "-Qt${QT_VERSION}${${COLORWIDGET_PROJECT_NAME}_VERSION_MAJOR}")
+else()
+    set (TARGET_OUTPUT_SUFFIX "")
+endif()
+
 set (INCLUDE_PREFIX "QtColorWidgets")
 set (COLOR_WIDGETS_LIBRARY "${TARGET_NAME}")
 
@@ -122,7 +128,7 @@ generate_versioning_information (
     VERSIONED_ENTITY ${COLORWIDGET_PROJECT_NAME}
     INCLUDE_PREFIX ${INCLUDE_PREFIX}
     COMPANY_NAME "Mattia Basaglia"
-    COMPANY_COPYRIGHT "Mattia Basaglia Copyright (C) 2013-2017"
+    COMPANY_COPYRIGHT "Mattia Basaglia Copyright (C) 2013-2020"
     FILE_DESCRIPTION "Color wheel widget and dialog for Qt${QT_VERSION}"
 )
 
@@ -152,7 +158,7 @@ use_qt (
 install_project (
   PROJECT_NAME ${COLORWIDGET_PROJECT_NAME}
   TARGET_NAME ${TARGET_NAME}
-  TARGET_OUTPUT_SUFFIX ${TARGET_OUTPUT_SUFFIX}
+  TARGET_OUTPUT_SUFFIX "${TARGET_OUTPUT_SUFFIX}"
   EXPORT_HEADER ${EXPORT_HEADER}
   INCLUDE_PREFIX ${INCLUDE_PREFIX}
   HEADER_MATCHING_REGEX "^.*\.h$|^.*\.hpp$|^.*$"
