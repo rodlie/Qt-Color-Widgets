@@ -37,16 +37,26 @@ class QCP_EXPORT ColorDelegate : public QStyledItemDelegate
 public:
     explicit ColorDelegate(QWidget *parent = 0);
 
-    virtual void paint(QPainter *painter, const QStyleOptionViewItem &option,
+    void paint(QPainter *painter, const QStyleOptionViewItem &option,
                     const QModelIndex &index) const Q_DECL_OVERRIDE;
 
-    bool editorEvent(QEvent* event,
-                     QAbstractItemModel* model,
-                     const QStyleOptionViewItem & option,
-                     const QModelIndex & index) override;
+    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+                               const QModelIndex &index) const Q_DECL_OVERRIDE;
 
-    virtual QSize sizeHint(const QStyleOptionViewItem &option,
-                           const QModelIndex &index) const Q_DECL_OVERRIDE;
+    void setEditorData(QWidget *editor, const QModelIndex &index) const Q_DECL_OVERRIDE;
+
+    void setModelData(QWidget *editor, QAbstractItemModel *model,
+                        const QModelIndex &index) const Q_DECL_OVERRIDE;
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const Q_DECL_OVERRIDE;
+
+    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
+                              const QModelIndex &index) const Q_DECL_OVERRIDE;
+
+
+private slots:
+    void close_editor();
+    void color_changed();
 };
 
 } // namespace color_widgets
