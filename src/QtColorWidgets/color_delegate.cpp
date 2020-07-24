@@ -106,7 +106,7 @@ void ColorDelegate::setEditorData(QWidget *editor, const QModelIndex &index) con
 void ColorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
                                   const QModelIndex &index) const
 {
-    if (index.data().canConvert<QColor>())
+    if ( index.data().type() == QVariant::Color )
     {
         ColorDialog *selector = qobject_cast<ColorDialog *>(editor);
         model->setData(index, QVariant::fromValue(selector->color()));
