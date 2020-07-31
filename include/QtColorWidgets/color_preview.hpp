@@ -39,6 +39,7 @@ class QCP_EXPORT ColorPreview : public QWidget
     Q_PROPERTY(QColor comparisonColor READ comparisonColor WRITE setComparisonColor NOTIFY comparisonColorChanged DESIGNABLE true)
     Q_PROPERTY(DisplayMode display_mode READ displayMode WRITE setDisplayMode NOTIFY displayModeChanged DESIGNABLE true)
     Q_PROPERTY(QBrush background READ background WRITE setBackground NOTIFY backgroundChanged DESIGNABLE true)
+    Q_PROPERTY(bool drawFrame READ drawFrame WRITE setDrawFrame NOTIFY drawFrameChanged DESIGNABLE true)
     Q_ENUMS(DisplayMode)
 public:
     enum DisplayMode
@@ -46,7 +47,8 @@ public:
         NoAlpha,    ///< Show current color with no transparency
         AllAlpha,   ///< show current color with transparency
         SplitAlpha, ///< Show both solid and transparent side by side
-        SplitColor  ///< Show current and comparison colors side by side
+        SplitColor, ///< Show current and comparison colors side by side
+        SplitColorReverse, ///< Like Split color but swapped
     };
     Q_ENUMS(DisplayMode)
 
@@ -74,6 +76,10 @@ public:
     QSize sizeHint () const;
 
     void paint(QPainter &painter, QRect rect) const;
+
+    /// Whether to draw a frame around the color
+    bool drawFrame() const;
+    void setDrawFrame(bool);
     
 public Q_SLOTS:
     /// Set current color
@@ -92,7 +98,7 @@ Q_SIGNALS:
     void comparisonColorChanged(QColor);
     void displayModeChanged(DisplayMode);
     void backgroundChanged(const QBrush&);
-
+    void drawFrameChanged(bool);
 protected:
     void paintEvent(QPaintEvent *);
     void resizeEvent(QResizeEvent *);

@@ -141,6 +141,7 @@ void ColorSelector::accept_dialog()
 {
     setColor(p->dialog->color());
     p->old_color = color();
+    Q_EMIT colorSelected(color());
 }
 
 void ColorSelector::reject_dialog()

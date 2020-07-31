@@ -37,6 +37,7 @@ public:
     QColor comparison; ///< comparison color
     QBrush back;///< Background brush, visible on a transparent color
     DisplayMode display_mode; ///< How the color(s) are to be shown
+    bool draw_frame = true; ///< Whether to draw a frame around the color
 
     Private() : col(Qt::red), back(Qt::darkGray, Qt::DiagCrossPattern), display_mode(NoAlpha)
     {}
@@ -110,16 +111,23 @@ void ColorPreview::paint(QPainter &painter, QRect rect) const
         c1 = p->comparison;
         c2 = p->col;
         break;
+    case DisplayMode::SplitColorReverse:
+        c1 = p->col;
+        c2 = p->comparison;
+        break;
     }
 
-    QStyleOptionFrame panel;
-    panel.initFrom(this);
-    panel.lineWidth = 2;
-    panel.midLineWidth = 0;
-    panel.state |= QStyle::State_Sunken;
-    style()->drawPrimitive(QStyle::PE_Frame, &panel, &painter, this);
-    QRect r = style()->subElementRect(QStyle::SE_FrameContents, &panel, this);
-    painter.setClipRect(r);
+    if ( p->draw_frame )
+    {
+        QStyleOptionFrame panel;
+        panel.initFrom(this);
+        panel.lineWidth = 2;
+        panel.midLineWidth = 0;
+        panel.state |= QStyle::State_Sunken;
+        style()->drawPrimitive(QStyle::PE_Frame, &panel, &painter, this);
+        QRect r = style()->subElementRect(QStyle::SE_FrameContents, &panel, this);
+        painter.setClipRect(r);
+    }
 
     if ( c1.alpha() < 255 || c2.alpha() < 255 )
         painter.fillRect(0, 0, rect.width(), rect.height(), p->back);
@@ -180,6 +188,17 @@ void ColorPreview::mouseMoveEvent(QMouseEvent *ev)
 
         drag->exec();
     }
+}
+
+bool ColorPreview::drawFrame() const
+{
+    return p->draw_frame;
+}
+
+void ColorPreview::setDrawFrame(bool draw)
+{
+    Q_EMIT drawFrameChanged(p->draw_frame = draw);
+    update();
 }
 
 } // namespace color_widgets
