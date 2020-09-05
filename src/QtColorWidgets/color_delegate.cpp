@@ -24,7 +24,7 @@
 #include "QtColorWidgets/color_dialog.hpp"
 #include <QPainter>
 #include <QMouseEvent>
-#include <QDebug>
+#include <QApplication>
 
 namespace color_widgets {
 
@@ -38,16 +38,27 @@ void ColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 {
     if ( index.data().type() == QVariant::Color )
     {
+
+        QStyleOptionViewItem opt = option;
+        initStyleOption(&opt, index);
+        const QWidget* widget = option.widget;
+        opt.showDecorationSelected = true;
+        QStyle *style = widget ? widget->style() : QApplication::style();
+        QRect geom = style->subElementRect(QStyle::SE_ItemViewItemText, &opt, widget);
+        opt.text = "";
+
         QStyleOptionFrame panel;
         panel.initFrom(option.widget);
         if (option.widget->isEnabled())
             panel.state = QStyle::State_Enabled;
-        panel.rect = option.rect;
+        panel.rect = geom;
         panel.lineWidth = 2;
         panel.midLineWidth = 0;
         panel.state |= QStyle::State_Sunken;
-        option.widget->style()->drawPrimitive(QStyle::PE_Frame, &panel, painter, nullptr);
-        QRect r = option.widget->style()->subElementRect(QStyle::SE_FrameContents, &panel, nullptr);
+
+        style->drawControl(QStyle::CE_ItemViewItem, &opt, painter, widget);
+        style->drawPrimitive(QStyle::PE_Frame, &panel, painter, nullptr);
+        QRect r = style->subElementRect(QStyle::SE_FrameContents, &panel, nullptr);
         painter->fillRect(r, index.data().value<QColor>());
     }
     else
