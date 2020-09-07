@@ -66,7 +66,7 @@ public:
 
     void setup()
     {
-        qreal backgroundValue = w->palette().background().color().valueF();
+        qreal backgroundValue = w->palette().window().color().valueF();
         backgroundIsDark = backgroundValue < 0.5;
     }
 

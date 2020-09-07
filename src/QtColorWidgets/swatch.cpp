@@ -312,8 +312,8 @@ void Swatch::setSelected(int selected)
         Q_EMIT selectedChanged( p->selected = selected );
         if ( selected != -1 )
             Q_EMIT colorSelected( p->palette.colorAt(p->selected) );
-        update();
     }
+    update();
 }
 
 void Swatch::clearSelection()
@@ -560,7 +560,7 @@ void Swatch::mouseDoubleClickEvent(QMouseEvent *event)
 
 void Swatch::wheelEvent(QWheelEvent* event)
 {
-    if ( event->delta() > 0 )
+    if ( event->angleDelta().y() < 0 )
         p->selected = qMin(p->selected + 1, p->palette.count() - 1);
     else if ( p->selected == -1 )
             p->selected = p->palette.count() - 1;

@@ -318,8 +318,7 @@ void ColorDialog::dropEvent(QDropEvent *event)
 
 static QColor get_screen_color(const QPoint &global_pos)
 {
-    int screenNum = QApplication::desktop()->screenNumber(global_pos);
-    QScreen *screen = QApplication::screens().at(screenNum);
+    QScreen *screen = QApplication::screenAt(global_pos);
 
     WId wid = QApplication::desktop()->winId();
     QImage img = screen->grabWindow(wid, global_pos.x(), global_pos.y(), 1, 1).toImage();
