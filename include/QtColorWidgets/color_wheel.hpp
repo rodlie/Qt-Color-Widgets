@@ -152,6 +152,11 @@ Q_SIGNALS:
 
     void colorSpaceChanged(ColorSpaceEnum space);
 
+    /**
+     * Emitted when the user releases from dragging
+     */
+    void editingFinished();
+
 protected:
     void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
     void mouseMoveEvent(QMouseEvent *) Q_DECL_OVERRIDE;

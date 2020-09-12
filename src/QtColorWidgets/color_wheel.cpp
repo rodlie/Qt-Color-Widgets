@@ -225,6 +225,8 @@ void ColorWheel::mouseReleaseEvent(QMouseEvent *ev)
 {
     mouseMoveEvent(ev);
     p->mouse_status = Nothing;
+    if ( ev->button() == Qt::LeftButton )
+        Q_EMIT editingFinished();
 }
 
 void ColorWheel::resizeEvent(QResizeEvent *)
