@@ -53,6 +53,8 @@ public:
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
                               const QModelIndex &index) const Q_DECL_OVERRIDE;
 
+protected:
+    bool eventFilter(QObject * watched, QEvent * event) Q_DECL_OVERRIDE;
 
 private slots:
     void close_editor();

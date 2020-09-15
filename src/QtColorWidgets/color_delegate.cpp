@@ -26,6 +26,7 @@
 #include <QMouseEvent>
 #include <QApplication>
 
+
 namespace color_widgets {
 
 ColorDelegate::ColorDelegate(QWidget *parent) :
@@ -138,6 +139,19 @@ void ColorDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionView
 
     QStyledItemDelegate::updateEditorGeometry(editor, option, index);
 
+}
+
+bool ColorDelegate::eventFilter(QObject * watched, QEvent * event)
+{
+    if ( event->type() == QEvent::Hide )
+    {
+        if ( auto editor = qobject_cast<ColorDialog*>(watched) )
+        {
+            emit closeEditor(editor, QAbstractItemDelegate::NoHint);
+            return false;
+        }
+    }
+    return QStyledItemDelegate::eventFilter(watched, event);
 }
 
 } // namespace color_widgets
