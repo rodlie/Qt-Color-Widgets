@@ -28,17 +28,27 @@
 
 namespace color_widgets {
 
-/**
-    Delegate to use a ColorSelector in a color list
-*/
-class QCP_EXPORT ColorDelegate : public QStyledItemDelegate
+
+class QCP_EXPORT ReadOnlyColorDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    explicit ColorDelegate(QWidget *parent = 0);
+    using QStyledItemDelegate::QStyledItemDelegate;
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                     const QModelIndex &index) const Q_DECL_OVERRIDE;
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const Q_DECL_OVERRIDE;
+};
+
+/**
+    Delegate to use a ColorSelector in a color list
+*/
+class QCP_EXPORT ColorDelegate : public ReadOnlyColorDelegate
+{
+    Q_OBJECT
+public:
+    using ReadOnlyColorDelegate::ReadOnlyColorDelegate;
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                                const QModelIndex &index) const Q_DECL_OVERRIDE;
@@ -47,8 +57,6 @@ public:
 
     void setModelData(QWidget *editor, QAbstractItemModel *model,
                         const QModelIndex &index) const Q_DECL_OVERRIDE;
-
-    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const Q_DECL_OVERRIDE;
 
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
                               const QModelIndex &index) const Q_DECL_OVERRIDE;

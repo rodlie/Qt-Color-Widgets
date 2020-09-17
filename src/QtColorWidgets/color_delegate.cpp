@@ -29,12 +29,8 @@
 
 namespace color_widgets {
 
-ColorDelegate::ColorDelegate(QWidget *parent) :
-    QStyledItemDelegate(parent)
-{
-}
 
-void ColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
+void ReadOnlyColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                            const QModelIndex &index) const
 {
     if ( index.data().type() == QVariant::Color )
@@ -68,7 +64,7 @@ void ColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     }
 }
 
-QSize ColorDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+QSize ReadOnlyColorDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     if ( index.data().type() == QVariant::Color )
         return QSize(24,16);
