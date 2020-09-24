@@ -155,6 +155,7 @@ Q_SIGNALS:
     void colorSizePolicyChanged(ColorSizePolicy colorSizePolicy);
     void doubleClicked(int index);
     void rightClicked(int index);
+    void clicked(int index);
     void forcedRowsChanged(int forcedRows);
     void forcedColumnsChanged(int forcedColumns);
     void readOnlyChanged(bool readOnly);

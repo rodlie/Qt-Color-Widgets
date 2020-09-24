@@ -504,9 +504,12 @@ void Swatch::mousePressEvent(QMouseEvent *event)
 {
     if ( event->button() == Qt::LeftButton )
     {
-        setSelected(indexAt(event->pos()));
+        int index = indexAt(event->pos());
+        setSelected(index);
         p->drag_pos = event->pos();
-        p->drag_index = indexAt(event->pos());
+        p->drag_index = index;
+        if ( index != -1 )
+            Q_EMIT clicked(index);
     }
     else if ( event->button() == Qt::RightButton )
     {
