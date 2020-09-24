@@ -22,6 +22,7 @@
 #include "QtColorWidgets/swatch.hpp"
 
 #include <cmath>
+#include <limits>
 #include <QPainter>
 #include <QMouseEvent>
 #include <QKeyEvent>
@@ -53,6 +54,8 @@ public:
     QColor  drop_color;     ///< Dropped color
     bool    drop_overwrite; ///< Whether the drop will overwrite an existing color
 
+    QSize   max_color_size;  ///< Mazimum size a color square can have
+
     Swatch* owner;
 
     Private(Swatch* owner)
@@ -66,6 +69,7 @@ public:
           drag_index(-1),
           drop_index(-1),
           drop_overwrite(false),
+          max_color_size(96, 128),
           owner(owner)
     {}
 
@@ -173,8 +177,10 @@ public:
      */
     QSizeF actualColorSize(const QSize& rowcols)
     {
-        return QSizeF (float(owner->width()) / rowcols.width(),
-                       float(owner->height()) / rowcols.height());
+        return QSizeF (
+            qMin(qreal(max_color_size.width()), qreal(owner->width()) / rowcols.width()),
+            qMin(qreal(max_color_size.height()), qreal(owner->height()) / rowcols.height())
+        );
     }
 
 
@@ -682,6 +688,17 @@ void Swatch::setColorSize(const QSize& colorSize)
 {
     if ( p->color_size != colorSize )
         Q_EMIT colorSizeChanged(p->color_size = colorSize);
+}
+
+QSize Swatch::maxColorSize() const
+{
+    return p->max_color_size;
+}
+
+void Swatch::setMaxColorSize(const QSize& colorSize)
+{
+    if ( p->max_color_size != colorSize )
+        Q_EMIT maxColorSizeChanged(p->max_color_size = colorSize);
 }
 
 Swatch::ColorSizePolicy Swatch::colorSizePolicy() const

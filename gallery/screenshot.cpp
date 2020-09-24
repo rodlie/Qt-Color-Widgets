@@ -82,9 +82,11 @@ int main(int argc, char *argv[])
 
     color_widgets::ColorPalette palette1;
     color_widgets::ColorPalette palette2;
+    color_widgets::ColorPalette palette3;
     int palette_columns = 12;
     palette1.setName("Palette 1");
     palette2.setName("Palette 2");
+    palette3.setName("Palette 3");
     palette1.setColumns(palette_columns);
     palette2.setColumns(palette_columns);
     for ( int i = 0; i < 6; i++ )
@@ -95,10 +97,14 @@ int main(int argc, char *argv[])
             palette1.appendColor(QColor::fromHsvF(i/8.0,1-f,0.5+f/2));
             palette2.appendColor(QColor::fromHsvF(i/8.0,1-f,1-f));
         }
+
+        palette3.appendColor(QColor::fromHsvF(i/8.0, 0.8, 1));
     }
     color_widgets::ColorPaletteModel palette_model;
     palette_model.addPalette(palette1, false);
     palette_model.addPalette(palette2, false);
+    palette_model.addPalette(palette3, false);
+
 
 
     color_widgets::ColorPreview preview;
@@ -144,8 +150,11 @@ int main(int argc, char *argv[])
     color_widgets::ColorPaletteWidget palette_widget;
     palette_widget.setModel(&palette_model);
     screenshot(palette_widget);
-    palette_widget.setReadOnly(true);
-    screenshot(palette_widget, "ColorPaletteWidget_readonly");
+
+    color_widgets::ColorPaletteWidget palette_widget1;
+    palette_widget1.setModel(&palette_model);
+    palette_widget1.setReadOnly(true);
+    screenshot(palette_widget1, "ColorPaletteWidget_readonly");
 
     color_widgets::HueSlider hue_slider;
     hue_slider.setColor(demo_color);

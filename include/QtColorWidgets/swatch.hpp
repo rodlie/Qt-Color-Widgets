@@ -87,6 +87,11 @@ class QCP_EXPORT Swatch : public QWidget
     Q_PROPERTY(bool readOnly READ readOnly WRITE setReadOnly NOTIFY readOnlyChanged)
 
 
+    /**
+     * \brief Maximum size a color square can have
+     */
+    Q_PROPERTY(QSize maxColorSize READ maxColorSize WRITE setMaxColorSize NOTIFY maxColorSizeChanged)
+
 public:
     enum ColorSizePolicy
     {
@@ -124,6 +129,7 @@ public:
     QColor colorAt(const QPoint& p);
 
     QSize colorSize() const;
+    QSize maxColorSize() const;
     ColorSizePolicy colorSizePolicy() const;
     QPen border() const;
 
@@ -137,6 +143,7 @@ public Q_SLOTS:
     void setSelected(int selected);
     void clearSelection();
     void setColorSize(const QSize& colorSize);
+    void setMaxColorSize(const QSize& colorSize);
     void setColorSizePolicy(ColorSizePolicy colorSizePolicy);
     void setBorder(const QPen& border);
     void setForcedRows(int forcedRows);
@@ -152,6 +159,7 @@ Q_SIGNALS:
     void selectedChanged(int selected);
     void colorSelected(const QColor& color);
     void colorSizeChanged(const QSize& colorSize);
+    void maxColorSizeChanged(const QSize& colorSize);
     void colorSizePolicyChanged(ColorSizePolicy colorSizePolicy);
     void doubleClicked(int index);
     void rightClicked(int index);
