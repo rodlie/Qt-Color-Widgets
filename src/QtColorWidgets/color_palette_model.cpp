@@ -270,6 +270,8 @@ bool ColorPaletteModel::updatePalette(int index, const ColorPalette& palette, bo
     ColorPalette& local_palette = p->palettes[index] = palette;
     p->fixUnnamed(local_palette);
 
+    Q_EMIT dataChanged(this->index(index), this->index(index));
+
     if ( save )
         return p->save(local_palette, filename);
 

@@ -298,9 +298,23 @@ void ColorPaletteWidget::setModel(ColorPaletteModel* model)
 {
     if ( model == p->model )
         return;
+
+    if ( p->model )
+    {
+        disconnect(model, &QAbstractItemModel::dataChanged, this, nullptr);
+    }
+
     p->model = model;
     p->swatch->setPalette(ColorPalette());
     p->palette_list->setModel(model);
+
+    if ( model )
+    {
+        connect(model, &QAbstractItemModel::dataChanged, this, [this](const QModelIndex &index){
+            if ( index.row() == p->palette_list->currentIndex() )
+                p->swatch->setPalette(p->model->palette(index.row()));
+        });
+    }
 }
 
 void ColorPaletteWidget::setColorSize(const QSize& colorSize)
