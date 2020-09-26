@@ -331,10 +331,7 @@ void Swatch::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event)
     QSize rowcols = p->rowcols();
-    if ( rowcols.isEmpty() )
-        return;
 
-    QSizeF color_size = p->actualColorSize(rowcols);
     QPainter painter(this);
 
     QStyleOptionFrame panel;
@@ -343,6 +340,11 @@ void Swatch::paintEvent(QPaintEvent* event)
     panel.midLineWidth = 0;
     panel.state |= QStyle::State_Sunken;
     style()->drawPrimitive(QStyle::PE_Frame, &panel, &painter, this);
+
+    if ( rowcols.isEmpty() )
+        return;
+
+    QSizeF color_size = p->actualColorSize(rowcols);
     QRect r = style()->subElementRect(QStyle::SE_FrameContents, &panel, this);
     painter.setClipRect(r);
 
@@ -515,13 +517,13 @@ void Swatch::mousePressEvent(QMouseEvent *event)
         p->drag_pos = event->pos();
         p->drag_index = index;
         if ( index != -1 )
-            Q_EMIT clicked(index);
+            Q_EMIT clicked(index, event->modifiers());
     }
     else if ( event->button() == Qt::RightButton )
     {
         int index = indexAt(event->pos());
         if ( index != -1 )
-            Q_EMIT rightClicked(index);
+            Q_EMIT rightClicked(index, event->modifiers());
     }
 }
 
@@ -563,7 +565,7 @@ void Swatch::mouseDoubleClickEvent(QMouseEvent *event)
     {
         int index = indexAt(event->pos());
         if ( index != -1 )
-            Q_EMIT doubleClicked(index);
+            Q_EMIT doubleClicked(index, event->modifiers());
     }
 }
 

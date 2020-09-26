@@ -161,9 +161,9 @@ Q_SIGNALS:
     void colorSizeChanged(const QSize& colorSize);
     void maxColorSizeChanged(const QSize& colorSize);
     void colorSizePolicyChanged(ColorSizePolicy colorSizePolicy);
-    void doubleClicked(int index);
-    void rightClicked(int index);
-    void clicked(int index);
+    void doubleClicked(int index, Qt::KeyboardModifiers modifiers);
+    void rightClicked(int index, Qt::KeyboardModifiers modifiers);
+    void clicked(int index, Qt::KeyboardModifiers modifiers);
     void forcedRowsChanged(int forcedRows);
     void forcedColumnsChanged(int forcedColumns);
     void readOnlyChanged(bool readOnly);
