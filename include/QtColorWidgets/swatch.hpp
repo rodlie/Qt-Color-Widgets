@@ -92,6 +92,13 @@ class QCP_EXPORT Swatch : public QWidget
      */
     Q_PROPERTY(QSize maxColorSize READ maxColorSize WRITE setMaxColorSize NOTIFY maxColorSizeChanged)
 
+    /**
+     * \brief Whether to show an extra color to perform a "clear" operation.
+     *
+     * Clicking on this extra pseudo-color will emit signals like clicked() etc with an index of -1.
+     */
+    Q_PROPERTY(bool showClearColor READ showClearColor WRITE setShowClearColor NOTIFY showClearColorChanged)
+
 public:
     enum ColorSizePolicy
     {
@@ -138,6 +145,8 @@ public:
 
     bool readOnly() const;
 
+    bool showClearColor() const;
+
 public Q_SLOTS:
     void setPalette(const ColorPalette& palette);
     void setSelected(int selected);
@@ -153,6 +162,7 @@ public Q_SLOTS:
      * \brief Remove the currently seleceted color
      **/
     void removeSelected();
+    void setShowClearColor(bool show);
 
 Q_SIGNALS:
     void paletteChanged(const ColorPalette& palette);
@@ -168,6 +178,7 @@ Q_SIGNALS:
     void forcedColumnsChanged(int forcedColumns);
     void readOnlyChanged(bool readOnly);
     void borderChanged(const QPen& border);
+    void showClearColorChanged(bool show);
 
 protected:
     bool event(QEvent* event) Q_DECL_OVERRIDE;

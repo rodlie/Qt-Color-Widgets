@@ -56,6 +56,8 @@ public:
 
     QSize   max_color_size;  ///< Mazimum size a color square can have
 
+    bool show_clear_color = false;
+
     Swatch* owner;
 
     Private(Swatch* owner)
@@ -78,7 +80,8 @@ public:
      */
     QSize rowcols()
     {
-        int count = palette.count();
+        int count = color_count();
+
         if ( count == 0 )
             return QSize();
 
@@ -90,11 +93,21 @@ public:
         if ( forced_columns )
             columns = forced_columns;
         else if ( columns == 0 )
-            columns = qMin(palette.count(), owner->width() / color_size.width());
+            columns = qMin(count, owner->width() / color_size.width());
 
         int rows = std::ceil( float(count) / columns );
 
         return QSize(columns, rows);
+    }
+
+    int color_count()
+    {
+        int count = palette.count();
+
+        if ( show_clear_color )
+            count++;
+
+        return count;
     }
 
     /**
@@ -103,7 +116,7 @@ public:
     void dropEvent(QDropEvent* event)
     {
         // Find the output location
-        drop_index = owner->indexAt(event->pos());
+        drop_index = indexAt(event->pos());
         if ( drop_index == -1 )
             drop_index = palette.count();
 
@@ -211,6 +224,32 @@ public:
             return QRectF();
         return indexRect(index, rc, actualColorSize(rc));
     }
+
+    int indexAt(const QPoint& pt, bool mark_clear = false)
+    {
+        QSize rowcols = this->rowcols();
+        if ( rowcols.isEmpty() )
+            return -1;
+
+        QSizeF color_size = actualColorSize(rowcols);
+
+        QPoint point(
+            pt.x() / color_size.width(),
+            pt.y() / color_size.height()
+        );
+
+        if ( point.x() < 0 || point.x() >= rowcols.width() || point.y() < 0 || point.y() >= rowcols.height() )
+            return -1;
+
+        int index = point.y() * rowcols.width() + point.x();
+
+        if ( mark_clear && index == palette.count() && show_clear_color )
+            return -2;
+
+        if ( index >= palette.count() )
+            return -1;
+        return index;
+    }
 };
 
 Swatch::Swatch(QWidget* parent)
@@ -278,21 +317,7 @@ QColor Swatch::selectedColor() const
 
 int Swatch::indexAt(const QPoint& pt)
 {
-    QSize rowcols = p->rowcols();
-    if ( rowcols.isEmpty() )
-        return -1;
-
-    QSizeF color_size = p->actualColorSize(rowcols);
-
-    QPoint point(
-        qBound<int>(0, pt.x() / color_size.width(), rowcols.width() - 1),
-        qBound<int>(0, pt.y() / color_size.height(), rowcols.height() - 1)
-    );
-
-    int index = point.y() * rowcols.width() + point.x();
-    if ( index >= p->palette.count() )
-        return -1;
-    return index;
+    return p->indexAt(pt);
 }
 
 QColor Swatch::colorAt(const QPoint& pt)
@@ -349,7 +374,7 @@ void Swatch::paintEvent(QPaintEvent* event)
     painter.setClipRect(r);
 
     int count = p->palette.count();
-        painter.setPen(p->border);
+    painter.setPen(p->border);
     for ( int y = 0, i = 0; i < count; y++ )
     {
         for ( int x = 0; x < rowcols.width() && i < count; x++, i++ )
@@ -357,6 +382,19 @@ void Swatch::paintEvent(QPaintEvent* event)
             painter.setBrush(p->palette.colorAt(i));
             painter.drawRect(p->indexRect(i, rowcols, color_size));
         }
+    }
+
+    if ( p->show_clear_color )
+    {
+        QRectF ir = p->indexRect(count, rowcols, color_size);
+        painter.setBrush(QColor(255, 255, 255));
+        painter.drawRect(ir);
+        painter.setPen(QPen(QColor(0xa40000), qBound(1., 5., color_size.width()/3)));
+        painter.setBrush(Qt::NoBrush);
+        painter.setClipRect(ir, Qt::IntersectClip);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.drawLine(ir.topLeft(), ir.bottomRight());
+        painter.drawLine(ir.topRight(), ir.bottomLeft());
     }
 
     painter.setClipping(false);
@@ -512,17 +550,22 @@ void Swatch::mousePressEvent(QMouseEvent *event)
 {
     if ( event->button() == Qt::LeftButton )
     {
-        int index = indexAt(event->pos());
+        int index = p->indexAt(event->pos(), true);
         setSelected(index);
         p->drag_pos = event->pos();
         p->drag_index = index;
-        if ( index != -1 )
+        if ( index == -2 )
+            Q_EMIT clicked(-1, event->modifiers());
+        else if ( index != -1 )
             Q_EMIT clicked(index, event->modifiers());
     }
     else if ( event->button() == Qt::RightButton )
     {
-        int index = indexAt(event->pos());
-        if ( index != -1 )
+        int index = p->indexAt(event->pos(), true);
+
+        if ( index == -2 )
+            Q_EMIT rightClicked(-1, event->modifiers());
+        else if ( index != -1 )
             Q_EMIT rightClicked(index, event->modifiers());
     }
 }
@@ -563,8 +606,11 @@ void Swatch::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if ( event->button() == Qt::LeftButton )
     {
-        int index = indexAt(event->pos());
-        if ( index != -1 )
+        int index = p->indexAt(event->pos(), true);
+
+        if ( index == -2 )
+            Q_EMIT doubleClicked(-1, event->modifiers());
+        else if ( index != -1 )
             Q_EMIT doubleClicked(index, event->modifiers());
     }
 }
@@ -772,8 +818,13 @@ bool Swatch::event(QEvent* event)
     if(event->type() == QEvent::ToolTip)
     {
         QHelpEvent* help_ev = static_cast<QHelpEvent*>(event);
-        int index = indexAt(help_ev->pos());
-        if ( index != -1 )
+        int index = p->indexAt(help_ev->pos(), true);
+        if ( index == -2 )
+        {
+            QToolTip::showText(help_ev->globalPos(), tr("Clear Color"), this, p->indexRect(index).toRect());
+            event->accept();
+        }
+        else if ( index != -1 )
         {
             QColor color = p->palette.colorAt(index);
             QString name = p->palette.nameAt(index);
@@ -807,6 +858,20 @@ void Swatch::setBorder(const QPen& border)
     {
         p->border = border;
         Q_EMIT borderChanged(border);
+        update();
+    }
+}
+
+bool Swatch::showClearColor() const
+{
+    return p->show_clear_color;
+}
+
+void Swatch::setShowClearColor(bool show)
+{
+    if ( show != p->show_clear_color )
+    {
+        Q_EMIT showClearColorChanged(p->show_clear_color = show);
         update();
     }
 }
