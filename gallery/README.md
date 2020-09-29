@@ -1,5 +1,5 @@
-Color Widgets
-=============
+Color Widgets Gallery
+=====================
 
 Color2DSlider
 -------------

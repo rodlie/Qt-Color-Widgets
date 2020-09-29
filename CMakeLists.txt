@@ -175,3 +175,11 @@ if (${QTCOLORWIDGETS_DESIGNER_PLUGIN})
         add_subdirectory (color_widgets_designer_plugin)
     endif(Qt5Designer_FOUND)
 endif()
+
+configure_file(Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+add_custom_target(
+    ${COLORWIDGET_PROJECT_NAME}_docs
+    COMMAND doxygen Doxyfile
+    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/gallery/*.png ${CMAKE_CURRENT_BINARY_DIR}/doxygen/html
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
