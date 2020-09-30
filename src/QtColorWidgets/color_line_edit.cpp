@@ -53,7 +53,7 @@ public:
         if ( preview_color )
         {
             QColor bg = customAlpha() ? Qt::transparent : color;
-            QColor text = detail::color_lumaF(color) > 0.5 || color.alphaF() < 0.2 ? Qt::black : Qt::white;
+            QColor text = utils::color_lumaF(color) > 0.5 || color.alphaF() < 0.2 ? Qt::black : Qt::white;
             parent->setStyleSheet(
                 QString("background-color: %1; color: %2;")
                 .arg(bg.name()).arg(text.name())

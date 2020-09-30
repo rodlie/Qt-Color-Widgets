@@ -21,10 +21,12 @@
  */
 #include "QtColorWidgets/color_utils.hpp"
 
-namespace color_widgets {
-namespace detail {
+#include <QScreen>
+#include <QDesktopWidget>
+#include <QApplication>
 
-QColor color_from_lch(qreal hue, qreal chroma, qreal luma, qreal alpha )
+
+QColor color_widgets::utils::color_from_lch(qreal hue, qreal chroma, qreal luma, qreal alpha )
 {
     qreal h1 = hue*6;
     qreal x = chroma*(1-qAbs(std::fmod(h1,2)-1));
@@ -51,7 +53,7 @@ QColor color_from_lch(qreal hue, qreal chroma, qreal luma, qreal alpha )
         alpha);
 }
 
-QColor color_from_hsl(qreal hue, qreal sat, qreal lig, qreal alpha )
+QColor color_widgets::utils::color_from_hsl(qreal hue, qreal sat, qreal lig, qreal alpha )
 {
     qreal chroma = (1 - qAbs(2*lig-1))*sat;
     qreal h1 = hue*6;
@@ -79,5 +81,13 @@ QColor color_from_hsl(qreal hue, qreal sat, qreal lig, qreal alpha )
         alpha);
 }
 
-} // namespace detail
-} // namespace color_widgets
+
+QColor color_widgets::utils::get_screen_color(const QPoint &global_pos)
+{
+    QScreen *screen = QApplication::screenAt(global_pos);
+
+    WId wid = QApplication::desktop()->winId();
+    QImage img = screen->grabWindow(wid, global_pos.x(), global_pos.y(), 1, 1).toImage();
+
+    return img.pixel(0,0);
+}

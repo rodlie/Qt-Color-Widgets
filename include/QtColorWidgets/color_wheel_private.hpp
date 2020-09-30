@@ -60,7 +60,7 @@ public:
     Private(ColorWheel *widget)
         : w(widget), hue(0), sat(0), val(0),
         wheel_width(20), mouse_status(Nothing),
-        color_from(&QColor::fromHsvF), rainbow_from_hue(&detail::rainbow_hsv)
+        color_from(&QColor::fromHsvF), rainbow_from_hue(&utils::rainbow_hsv)
     {
     }
 
@@ -264,13 +264,13 @@ public:
                 break;
             case ColorHSL:
                 hue = nice_hue;
-                sat = detail::color_HSL_saturationF(c);
-                val = detail::color_lightnessF(c);
+                sat = utils::color_HSL_saturationF(c);
+                val = utils::color_lightnessF(c);
                 break;
             case ColorLCH:
                 hue = nice_hue;
-                sat = detail::color_chromaF(c);
-                val = detail::color_lumaF(c);
+                sat = utils::color_chromaF(c);
+                val = utils::color_lumaF(c);
                 break;
         }
     }

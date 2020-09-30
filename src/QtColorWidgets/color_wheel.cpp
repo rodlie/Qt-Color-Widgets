@@ -292,24 +292,24 @@ void ColorWheel::setColorSpace(color_widgets::ColorWheel::ColorSpaceEnum space)
         {
             case ColorHSL:
                 p->hue = old_col.hueF();
-                p->sat = detail::color_HSL_saturationF(old_col);
-                p->val = detail::color_lightnessF(old_col);
-                p->color_from = &detail::color_from_hsl;
-                p->rainbow_from_hue = &detail::rainbow_hsv;
+                p->sat = utils::color_HSL_saturationF(old_col);
+                p->val = utils::color_lightnessF(old_col);
+                p->color_from = &utils::color_from_hsl;
+                p->rainbow_from_hue = &utils::rainbow_hsv;
                 break;
             case ColorHSV:
                 p->hue = old_col.hsvHueF();
                 p->sat = old_col.hsvSaturationF();
                 p->val = old_col.valueF();
                 p->color_from = &QColor::fromHsvF;
-                p->rainbow_from_hue = &detail::rainbow_hsv;
+                p->rainbow_from_hue = &utils::rainbow_hsv;
                 break;
             case ColorLCH:
                 p->hue = old_col.hueF();
-                p->sat = detail::color_chromaF(old_col);
-                p->val = detail::color_lumaF(old_col);
-                p->color_from = &detail::color_from_lch;
-                p->rainbow_from_hue = &detail::rainbow_lch;
+                p->sat = utils::color_chromaF(old_col);
+                p->val = utils::color_lumaF(old_col);
+                p->color_from = &utils::color_from_lch;
+                p->rainbow_from_hue = &utils::rainbow_lch;
                 break;
         }
 

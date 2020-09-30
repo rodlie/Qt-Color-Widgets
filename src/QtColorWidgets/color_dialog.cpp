@@ -30,6 +30,8 @@
 #include <QPushButton>
 #include <QScreen>
 
+#include "QtColorWidgets/color_utils.hpp"
+
 namespace color_widgets {
 
 class ColorDialog::Private
@@ -316,21 +318,11 @@ void ColorDialog::dropEvent(QDropEvent *event)
     }
 }
 
-static QColor get_screen_color(const QPoint &global_pos)
-{
-    QScreen *screen = QApplication::screenAt(global_pos);
-
-    WId wid = QApplication::desktop()->winId();
-    QImage img = screen->grabWindow(wid, global_pos.x(), global_pos.y(), 1, 1).toImage();
-
-    return img.pixel(0,0);
-}
-
 void ColorDialog::mouseReleaseEvent(QMouseEvent *event)
 {
     if (p->pick_from_screen)
     {
-        setColorInternal(get_screen_color(event->globalPos()));
+        setColorInternal(utils::get_screen_color(event->globalPos()));
         p->pick_from_screen = false;
         releaseMouse();
     }
@@ -340,7 +332,7 @@ void ColorDialog::mouseMoveEvent(QMouseEvent *event)
 {
     if (p->pick_from_screen)
     {
-        setColorInternal(get_screen_color(event->globalPos()));
+        setColorInternal(utils::get_screen_color(event->globalPos()));
     }
 }
 
