@@ -34,6 +34,12 @@ library and you can link the required targets to ColorWidgets.
 All the required files are in ./src and ./include.
 
 
+Documentation
+-------------
+
+See https://mattbas.gitlab.io/Qt-Color-Widgets/
+
+
 Installing as a Qt Designer/Creator Plugin
 ------------------------------------------
 
@@ -51,8 +57,8 @@ Latest Version
 
 The latest version of the sources can be found at the following locations:
 
-* https://gitlab.com/mattia.basaglia/Qt-Color-Widgets
-* git://gitlab.com/mattia.basaglia/Qt-Color-Widgets.git
+* https://gitlab.com/mattbas/Qt-Color-Widgets
+* git://gitlab.com/mattbas/Qt-Color-Widgets.git
 
 
 License
