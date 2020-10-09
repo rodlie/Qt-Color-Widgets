@@ -30,6 +30,7 @@
 #include <QMimeData>
 #include <QDropEvent>
 #include <QDragEnterEvent>
+#include <QMenu>
 
 #include "QtColorWidgets/gradient_helper.hpp"
 #include "QtColorWidgets/color_dialog.hpp"
@@ -172,6 +173,25 @@ public:
         pos = (stops[i_before].first + stops[i_before+1].first) / 2;
         color = blendColors(stops[i_before].second, stops[i_before+1].second, 0.5);
     }
+
+    void add_color_mouse(QMouseEvent* ev, GradientEditor* parent)
+    {
+        qreal pos = move_pos(ev->pos(), parent);
+        auto info = gradientBlendedColorInsert(stops, pos);
+        stops.insert(info.first, info.second);
+        selected = highlighted = info.first;
+        refresh_gradient();
+    }
+
+    void show_dialog_highlighted()
+    {
+        if ( highlighted == -1 )
+            return;
+
+        dialog_selected = highlighted;
+        color_dialog.setColor(stops[highlighted].second);
+        color_dialog.show();
+    }
 };
 
 GradientEditor::GradientEditor(QWidget *parent) :
@@ -223,18 +243,12 @@ void GradientEditor::mouseDoubleClickEvent(QMouseEvent *ev)
             qreal tolerance = 4;
             if ( qAbs(mouse_pos - highlighted_pos) <= tolerance )
             {
-                p->dialog_selected = p->highlighted;
-                p->color_dialog.setColor(p->stops[p->highlighted].second);
-                p->color_dialog.show();
+                p->show_dialog_highlighted();
                 return;
             }
         }
 
-        qreal pos = p->move_pos(ev->pos(), this);
-        auto info = gradientBlendedColorInsert(p->stops, pos);
-        p->stops.insert(info.first, info.second);
-        p->selected = p->highlighted = info.first;
-        p->refresh_gradient();
+        p->add_color_mouse(ev, this);
         Q_EMIT selectedStopChanged(p->selected);
         update();
     }
@@ -269,13 +283,13 @@ void GradientEditor::mouseMoveEvent(QMouseEvent *ev)
         {
             std::swap(p->stops[p->selected], p->stops[p->selected-1]);
             p->selected--;
-            emit selectedStopChanged(p->selected);
+            Q_EMIT selectedStopChanged(p->selected);
         }
         else if ( p->selected < p->stops.size()-1 && pos > p->stops[p->selected+1].first )
         {
             std::swap(p->stops[p->selected], p->stops[p->selected+1]);
             p->selected++;
-            emit selectedStopChanged(p->selected);
+            Q_EMIT selectedStopChanged(p->selected);
         }
         p->highlighted = p->selected;
         p->stops[p->selected].first = pos;
@@ -298,18 +312,50 @@ void GradientEditor::mouseReleaseEvent(QMouseEvent *ev)
         QPoint localpt = ev->localPos().toPoint();
         const int w_margin = 24;
         const int h_margin = 8;
-        if ( !bound_rect.contains(localpt) && p->stops.size() > 1 && (
-            localpt.x() < -w_margin || localpt.x() > bound_rect.width() + w_margin ||
-            localpt.y() < -h_margin || localpt.y() > bound_rect.height() + h_margin
-        ) )
+        bool x_out = localpt.x() < -w_margin || localpt.x() > bound_rect.width() + w_margin;
+        bool y_out = localpt.y() < -h_margin || localpt.y() > bound_rect.height() + h_margin;
+
+        if ( p->stops.size() > 1 && (
+            (orientation() == Qt::Horizontal && !x_out && y_out) ||
+            (orientation() == Qt::Vertical && x_out && !y_out)
+        ))
         {
             p->stops.remove(p->selected);
             p->highlighted = p->selected = p->dialog_selected = -1;
             p->refresh_gradient();
-            emit selectedStopChanged(p->selected);
+            Q_EMIT selectedStopChanged(p->selected);
         }
-        emit stopsChanged(p->stops);
+
+        Q_EMIT stopsChanged(p->stops);
         update();
+    }
+    else if ( ev->button() == Qt::RightButton )
+    {
+        QMenu menu(this);
+        menu.addAction(QIcon::fromTheme("list-add"), tr("Add Color"), this, [this, ev]{
+            p->add_color_mouse(ev, this);
+            Q_EMIT selectedStopChanged(p->selected);
+            Q_EMIT stopsChanged(p->stops);
+            update();
+        });
+        if ( p->highlighted != -1 )
+        {
+            int h = p->highlighted; // leaveEvent resets it when showing the menu
+            menu.addAction(QIcon::fromTheme("list-remove"), tr("Remove Color"), this, [this, h]{
+                p->stops.remove(h);
+                p->highlighted = -1;
+                p->refresh_gradient();
+                Q_EMIT selectedStopChanged(p->selected);
+                Q_EMIT stopsChanged(p->stops);
+                update();
+            });
+            menu.addAction(QIcon::fromTheme("document-edit"), tr("Edit Color..."), this, [this, h]{
+                p->highlighted = h;
+                p->show_dialog_highlighted();
+            });
+        }
+
+        menu.exec(ev->globalPos());
     }
     else
     {
