@@ -58,7 +58,7 @@ Latest Version
 The latest version of the sources can be found at the following locations:
 
 * https://gitlab.com/mattbas/Qt-Color-Widgets
-* git://gitlab.com/mattbas/Qt-Color-Widgets.git
+* git@gitlab.com:mattbas/Qt-Color-Widgets.git
 
 
 License
