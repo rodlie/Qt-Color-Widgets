@@ -26,9 +26,7 @@
 #include <QPainter>
 #include <QPixmap>
 
-using namespace color_widgets;
-
-class GradientListModel::Private
+class color_widgets::GradientListModel::Private
 {
 public:
     struct Gradient
@@ -90,12 +88,12 @@ public:
     }
 };
 
-GradientListModel::GradientListModel(QObject *parent)
+color_widgets::GradientListModel::GradientListModel(QObject *parent)
     : QAbstractListModel(parent), d(new Private())
 {
 }
 
-GradientListModel::~GradientListModel() = default;
+color_widgets::GradientListModel::~GradientListModel() = default;
 
 
 int color_widgets::GradientListModel::count() const
