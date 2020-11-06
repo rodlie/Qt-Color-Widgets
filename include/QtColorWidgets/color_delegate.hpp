@@ -39,6 +39,12 @@ public:
                     const QModelIndex &index) const Q_DECL_OVERRIDE;
 
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const Q_DECL_OVERRIDE;
+
+    void setSizeHintForColor(const QSize& size_hint);
+    const QSize& sizeHintForColor() const;
+
+private:
+    QSize size_hint{24, 16};
 };
 
 /**

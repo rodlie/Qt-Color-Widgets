@@ -27,10 +27,8 @@
 #include <QApplication>
 
 
-namespace color_widgets {
 
-
-void ReadOnlyColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
+void color_widgets::ReadOnlyColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                            const QModelIndex &index) const
 {
     if ( index.data().type() == QVariant::Color )
@@ -64,16 +62,28 @@ void ReadOnlyColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem 
     }
 }
 
-QSize ReadOnlyColorDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+QSize color_widgets::ReadOnlyColorDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     if ( index.data().type() == QVariant::Color )
-        return QSize(24,16);
+        return size_hint;
     return QStyledItemDelegate::sizeHint(option, index);
 }
 
-QWidget *ColorDelegate::createEditor(QWidget *parent,
-                                      const QStyleOptionViewItem &option,
-                                      const QModelIndex &index) const
+void color_widgets::ReadOnlyColorDelegate::setSizeHintForColor(const QSize& size_hint)
+{
+    this->size_hint = size_hint;
+}
+
+const QSize& color_widgets::ReadOnlyColorDelegate::sizeHintForColor() const
+{
+    return size_hint;
+}
+
+
+QWidget *color_widgets::ColorDelegate::createEditor(
+    QWidget *parent,
+    const QStyleOptionViewItem &option,
+    const QModelIndex &index) const
 {
     if ( index.data().type() == QVariant::Color )
     {
@@ -86,19 +96,19 @@ QWidget *ColorDelegate::createEditor(QWidget *parent,
     return QStyledItemDelegate::createEditor(parent, option, index);
 }
 
-void ColorDelegate::color_changed()
+void color_widgets::ColorDelegate::color_changed()
 {
     ColorDialog *editor = qobject_cast<ColorDialog*>(sender());
     emit commitData(editor);
 }
 
-void ColorDelegate::close_editor()
+void color_widgets::ColorDelegate::close_editor()
 {
     ColorDialog *editor = qobject_cast<ColorDialog*>(sender());
     emit closeEditor(editor);
 }
 
-void ColorDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+void color_widgets::ColorDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
 
     if ( index.data().type() == QVariant::Color )
@@ -111,7 +121,7 @@ void ColorDelegate::setEditorData(QWidget *editor, const QModelIndex &index) con
     QStyledItemDelegate::setEditorData(editor, index);
 }
 
-void ColorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
+void color_widgets::ColorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
                                   const QModelIndex &index) const
 {
     if ( index.data().type() == QVariant::Color )
@@ -124,7 +134,7 @@ void ColorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
     QStyledItemDelegate::setModelData(editor, model, index);
 }
 
-void ColorDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
+void color_widgets::ColorDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
                                          const QModelIndex &index) const
 {
     if ( index.data().type() == QVariant::Color )
@@ -137,7 +147,7 @@ void ColorDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionView
 
 }
 
-bool ColorDelegate::eventFilter(QObject * watched, QEvent * event)
+bool color_widgets::ColorDelegate::eventFilter(QObject * watched, QEvent * event)
 {
     if ( event->type() == QEvent::Hide )
     {
@@ -149,5 +159,3 @@ bool ColorDelegate::eventFilter(QObject * watched, QEvent * event)
     }
     return QStyledItemDelegate::eventFilter(watched, event);
 }
-
-} // namespace color_widgets
