@@ -43,6 +43,9 @@ public:
     void setSizeHintForColor(const QSize& size_hint);
     const QSize& sizeHintForColor() const;
 
+protected:
+    void paintItem(QPainter *painter, const QStyleOptionViewItem &option,
+                    const QModelIndex &index, const QBrush& brush) const;
 private:
     QSize size_hint{24, 16};
 };

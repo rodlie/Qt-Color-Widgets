@@ -27,13 +27,13 @@
 #include <QApplication>
 
 
-
-void color_widgets::ReadOnlyColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
-                           const QModelIndex &index) const
+void color_widgets::ReadOnlyColorDelegate::paintItem(
+    QPainter* painter,
+    const QStyleOptionViewItem& option,
+    const QModelIndex& index,
+    const QBrush& brush
+) const
 {
-    if ( index.data().type() == QVariant::Color )
-    {
-
         QStyleOptionViewItem opt = option;
         initStyleOption(&opt, index);
         const QWidget* widget = option.widget;
@@ -54,7 +54,17 @@ void color_widgets::ReadOnlyColorDelegate::paint(QPainter *painter, const QStyle
         style->drawControl(QStyle::CE_ItemViewItem, &opt, painter, widget);
         style->drawPrimitive(QStyle::PE_Frame, &panel, painter, nullptr);
         QRect r = style->subElementRect(QStyle::SE_FrameContents, &panel, nullptr);
-        painter->fillRect(r, index.data().value<QColor>());
+        painter->fillRect(r, brush);
+}
+
+
+
+void color_widgets::ReadOnlyColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
+                           const QModelIndex &index) const
+{
+    if ( index.data().type() == QVariant::Color )
+    {
+        paintItem(painter, option, index, index.data().value<QColor>());
     }
     else
     {
