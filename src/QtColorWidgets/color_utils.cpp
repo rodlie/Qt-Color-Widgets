@@ -84,7 +84,12 @@ QColor color_widgets::utils::color_from_hsl(qreal hue, qreal sat, qreal lig, qre
 
 QColor color_widgets::utils::get_screen_color(const QPoint &global_pos)
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
     QScreen *screen = QApplication::screenAt(global_pos);
+#else
+    int screenNum = QApplication::desktop()->screenNumber(global_pos);
+    QScreen *screen = QApplication::screens().at(screenNum);
+#endif
 
     WId wid = QApplication::desktop()->winId();
     QImage img = screen->grabWindow(wid, global_pos.x(), global_pos.y(), 1, 1).toImage();

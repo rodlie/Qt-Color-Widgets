@@ -22,7 +22,7 @@ macro (find_qt
       OPTIONAL_COMPONENTS
       ${i_optional_components})
   elseif (5 EQUAL QT_VERSION)
-    find_package (Qt5 5.9 REQUIRED
+    find_package (Qt5 5.5 REQUIRED
       COMPONENTS
       ${i_required_components}
       OPTIONAL_COMPONENTS
