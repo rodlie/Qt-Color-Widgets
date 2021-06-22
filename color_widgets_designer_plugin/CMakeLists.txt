@@ -155,7 +155,7 @@ endforeach (HEADER IN HEADERS)
 
 # install
 get_target_property (QT_QMAKE_EXECUTABLE
-  Qt5::qmake LOCATION)
+  Qt::qmake LOCATION)
 
 execute_process (
   COMMAND ${QT_QMAKE_EXECUTABLE} -query QT_INSTALL_PLUGINS
