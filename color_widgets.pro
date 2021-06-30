@@ -15,11 +15,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 TEMPLATE=lib
-CONFIG += dll
+#CONFIG += dll
 QT += core gui widgets
 DEFINES += QTCOLORWIDGETS_LIBRARY
 
-TARGET=QtColorWidgets-Qt5
+INCLUDEPATH += $$PWD/include
+
+TARGET=QtColorWidgets
 
 VERSION=2.2.0
 
@@ -35,9 +37,9 @@ build_all:!build_pass {
  CONFIG += release
 }
 
-unix {
-    LIB_TARGET = lib$${TARGET}.so
-}
+#unix {
+#    LIB_TARGET = lib$${TARGET}.so
+#}
 win32 {
     LIB_TARGET = $${TARGET}.dll
 }
